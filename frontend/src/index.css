@@ -1,0 +1,49 @@
+@import "tailwindcss";
+
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    box-sizing: border-box;
+  }
+
+  html {
+    color-scheme: light;
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+    tab-size: 4;
+  }
+
+  body {
+    margin: 0;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Accessible Focus Rings (WCAG 2.1 AA - 2.4.7 Focus Visible & 2.4.11 Focus Appearance) */
+  :focus-visible {
+    outline: 2px solid #0d9488;
+    outline-offset: 2px;
+  }
+
+  /* Accessible Text Selection Highlight */
+  ::selection {
+    background-color: #0d9488;
+    color: #ffffff;
+  }
+}
+
+/* Reduced Motion Support (WCAG 2.1 AA - 2.3.3 Animation from Interactions) */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

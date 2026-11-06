@@ -1,0 +1,17 @@
+#!/bin/sh
+# AccessMap Maven Wrapper for Linux / macOS
+JAVA_HOME="${JAVA_HOME:-/usr/lib/jvm/default-java}"
+PRG="$0"
+while [ -h "$PRG" ]; do
+  ls=`ls -ld "$PRG"`
+  link=`expr "$ls" : '.*-> \(.*\)$'`
+  if expr "$link" : '/.*' > /dev/null; then
+    PRG="$link"
+  else
+    PRG=`dirname "$PRG"`/"$link"
+  fi
+done
+PROJECT_DIR=`dirname "$PRG"`
+WRAPPER_JAR="$PROJECT_DIR/.mvn/wrapper/maven-wrapper.jar"
+exec "$JAVA_HOME/bin/java" -Dmaven.multiModuleProjectDirectory="$PROJECT_DIR" -cp "$WRAPPER_JAR" org.apache.maven.wrapper.MavenWrapperMain "$@"
+

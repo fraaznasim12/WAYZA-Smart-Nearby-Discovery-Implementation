@@ -1,0 +1,42 @@
+services:
+  postgres:
+    image: postgis/postgis:16-3.4
+    container_name: accessmap-postgis
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-${DB_NAME:-accessmap}}
+      POSTGRES_USER: ${POSTGRES_USER:-${DB_USER:-accessmap_user}}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-${DB_PASSWORD:-accessmap_dev_password}}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgis_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-${DB_USER:-accessmap_user}} -d ${POSTGRES_DB:-${DB_NAME:-accessmap}}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: accessmap-backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: ${POSTGRES_DB:-accessmap}
+      DB_USER: ${POSTGRES_USER:-accessmap_user}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-accessmap_dev_password}
+      JWT_SECRET: ${JWT_SECRET:-ThisIsAPlaceholderSecretChangeItInProductionNow!!}
+      CORS_ORIGINS: "http://localhost:5173,http://localhost:3000"
+    ports:
+      - "8080:8080"
+
+volumes:
+  postgis_data:
+    driver: local
