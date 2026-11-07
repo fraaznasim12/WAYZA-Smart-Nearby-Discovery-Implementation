@@ -11,8 +11,23 @@ import { ContactPage } from './pages/ContactPage';
 import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
 import { DashboardPage } from './pages/DashboardPage';
-import { AdminPage } from './pages/AdminPage';
+import { MyReportsPage } from './pages/MyReportsPage';
+import { MyDisputesPage } from './pages/MyDisputesPage';
+import { AdminLayout } from './pages/admin/AdminLayout';
+import { AdminOverviewPage } from './pages/admin/AdminOverviewPage';
+import { AdminUsersPage } from './pages/admin/AdminUsersPage';
+import { AdminPlacesPage } from './pages/admin/AdminPlacesPage';
+import { AdminReportsPage } from './pages/admin/AdminReportsPage';
+import { AdminVerificationsPage } from './pages/admin/AdminVerificationsPage';
+import { AdminDisputesPage } from './pages/admin/AdminDisputesPage';
+import { AdminBusinessClaimsPage } from './pages/admin/AdminBusinessClaimsPage';
+import { AdminDataManagementPage } from './pages/admin/AdminDataManagementPage';
+import { AdminAuditLogsPage } from './pages/admin/AdminAuditLogsPage';
+import { AdminSettingsPage } from './pages/admin/AdminSettingsPage';
 import { BusinessPage } from './pages/BusinessPage';
+import { NotificationsPage } from './pages/NotificationsPage';
+import { NotificationSettingsPage } from './pages/NotificationSettingsPage';
+import { AiAssistantPage } from './pages/AiAssistantPage';
 import { NotFoundPage } from './pages/NotFoundPage';
 
 /**
@@ -37,6 +52,7 @@ export const App: React.FC = () => {
           {/* Public Routes */}
           <Route path="/" element={<HomePage />} />
           <Route path="/explore" element={<ExplorePage />} />
+          <Route path="/assistant" element={<AiAssistantPage />} />
           <Route path="/how-it-works" element={<HowItWorksPage />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/contact" element={<ContactPage />} />
@@ -53,13 +69,72 @@ export const App: React.FC = () => {
             }
           />
           <Route
-            path="/admin"
+            path="/reports"
             element={
-              <ProtectedRoute allowedRoles={['ROLE_ADMIN']}>
-                <AdminPage />
+              <ProtectedRoute>
+                <MyReportsPage />
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/my-reports"
+            element={
+              <ProtectedRoute>
+                <MyReportsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/my-disputes"
+            element={
+              <ProtectedRoute>
+                <MyDisputesPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/disputes"
+            element={
+              <ProtectedRoute>
+                <MyDisputesPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/notifications"
+            element={
+              <ProtectedRoute>
+                <NotificationsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/notifications/settings"
+            element={
+              <ProtectedRoute>
+                <NotificationSettingsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute allowedRoles={['ROLE_ADMIN']}>
+                <AdminLayout />
+              </ProtectedRoute>
+            }
+          >
+            <Route index element={<AdminOverviewPage />} />
+            <Route path="users" element={<AdminUsersPage />} />
+            <Route path="places" element={<AdminPlacesPage />} />
+            <Route path="reports" element={<AdminReportsPage />} />
+            <Route path="verifications" element={<AdminVerificationsPage />} />
+            <Route path="disputes" element={<AdminDisputesPage />} />
+            <Route path="business-claims" element={<AdminBusinessClaimsPage />} />
+            <Route path="data-management" element={<AdminDataManagementPage />} />
+            <Route path="audit-logs" element={<AdminAuditLogsPage />} />
+            <Route path="settings" element={<AdminSettingsPage />} />
+          </Route>
           <Route
             path="/business"
             element={

@@ -5,32 +5,30 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * Response DTO representing a Place with its full accessibility feature breakdown.
+ * Response DTO representing a Place with geographical coordinates and accessibility breakdown.
  *
- * <p>Uses a Java 21 {@code record} for immutable, clean data transfer between
- * the Service layer and the REST Controller.
- *
- * @param id         the unique venue identifier
- * @param name       the venue name
- * @param category   the venue category (e.g., HOSPITAL, COLLEGE)
- * @param address    the full address string
- * @param city       the city
- * @param latitude   WGS84 latitude coordinate
- * @param longitude  WGS84 longitude coordinate
- * @param features   list of accessibility feature statuses for this place
- * @param createdAt  timestamp when this venue was first registered
- * @param updatedAt  timestamp of the most recent update
+ * <p>Uses a Java 21 {@code record} for immutable, clean data transfer.
  */
 public record PlaceDto(
     UUID id,
     String name,
+    String description,
     String category,
     String address,
     String city,
+    String state,
+    String postalCode,
+    String country,
     double latitude,
     double longitude,
+    Double distanceMeters,
+    String phone,
+    String website,
+    Boolean isActive,
+    String sourceName,
+    String externalSourceId,
+    OffsetDateTime lastImportedAt,
     List<AccessibilityFeatureDto> features,
     OffsetDateTime createdAt,
     OffsetDateTime updatedAt
 ) {}
-

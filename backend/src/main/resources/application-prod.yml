@@ -1,0 +1,185 @@
+# =============================================================================
+# AccessMap Backend — Dedicated Production Profile ('prod')
+# =============================================================================
+# Target Architecture:
+#   - Hosting: Render (Docker Container)
+#   - Database: Supabase PostgreSQL 16 + PostGIS 3.4
+#   - Storage: Cloudflare R2 (S3-compatible Object Storage)
+#   - Frontend: Vercel (HTTPS)
+# =============================================================================
+
+server:
+  # Render automatically injects the PORT environment variable (default: 8080)
+  port: ${PORT:8080}
+  address: 0.0.0.0
+  # Graceful shutdown allows in-flight requests to complete during deploys
+  shutdown: graceful
+  error:
+    include-message: never
+    include-stacktrace: never
+    include-binding-errors: never
+
+spring:
+  application:
+    name: accessmap-backend
+
+  lifecycle:
+    # Maximum time allocated for graceful shutdown of active HTTP connections
+    timeout-per-shutdown-phase: 20s
+
+  # ---------------------------------------------------------------------------
+  # Supabase Managed PostgreSQL + PostGIS DataSource
+  # ---------------------------------------------------------------------------
+  datasource:
+    # Supports full JDBC URL (DB_URL) or individual connection parameters.
+    # Note: search_path includes both 'public' and 'extensions' to ensure PostGIS
+    # spatial functions (ST_DWithin, ST_MakePoint) resolve regardless of schema.
+    url: ${DB_URL:jdbc:postgresql://${DB_HOST}:${DB_PORT:5432}/${DB_NAME:postgres}?sslmode=require&options=-csearch_path%3Dpublic,extensions}
+    username: ${DB_USER:postgres}
+    password: ${DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      pool-name: AccessMapSupabaseHikariPool
+      maximum-pool-size: ${DB_POOL_MAX_SIZE:10}
+      minimum-idle: ${DB_POOL_MIN_IDLE:2}
+      idle-timeout: 300000       # 5 minutes
+      max-lifetime: 1200000      # 20 minutes (recycles connections before Supabase PgBouncer closes them)
+      connection-timeout: 20000  # 20 seconds
+      # Ensures PostGIS functions in the 'extensions' schema are always in search_path
+      connection-init-sql: "SET search_path TO public, extensions"
+      validation-timeout: 5000
+
+  # ---------------------------------------------------------------------------
+  # JPA / Hibernate Configuration for Production PostgreSQL
+  # ---------------------------------------------------------------------------
+  jpa:
+    open-in-view: false
+    hibernate:
+      # strictly 'validate' in production; Flyway owns all schema DDL
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: false
+        default_schema: public
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        jdbc:
+          batch_size: 25
+          order_inserts: true
+          order_updates: true
+
+  # ---------------------------------------------------------------------------
+  # Flyway Migration Configuration
+  # ---------------------------------------------------------------------------
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+    validate-on-migrate: true
+    # STRICT SAFETY: Prevent destructive clean in production under all circumstances
+    clean-disabled: true
+
+  # ---------------------------------------------------------------------------
+  # Multipart Upload Limits
+  # ---------------------------------------------------------------------------
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 15MB
+      max-request-size: 50MB
+      file-size-threshold: 2MB
+
+# ---------------------------------------------------------------------------
+# AccessMap Application Settings
+# ---------------------------------------------------------------------------
+accessmap:
+  jwt:
+    # In production, JWT_SECRET is required from environment variables (minimum 256 bits).
+    secret: ${JWT_SECRET}
+    expiration-ms: ${JWT_EXPIRATION_MS:3600000}       # 1 hour
+    refresh-expiration-ms: ${JWT_REFRESH_EXPIRATION_MS:604800000}  # 7 days
+
+  cors:
+    # Production frontend domains (comma-separated, e.g. https://accessmap.vercel.app)
+    allowed-origins: ${CORS_ORIGINS:https://accessmap.vercel.app}
+
+  verification:
+    staleness-threshold-days: ${STALENESS_THRESHOLD_DAYS:180}
+
+  # ---------------------------------------------------------------------------
+  # OpenStreetMap / Overpass API Configuration
+  # ---------------------------------------------------------------------------
+  osm:
+    overpass-endpoint: ${OVERPASS_ENDPOINT:https://overpass-api.de/api/interpreter}
+    enabled: ${OSM_ENABLED:true}
+    timeout-seconds: ${OSM_TIMEOUT_SECONDS:15}
+    rate-limit-ms: ${OSM_RATE_LIMIT_MS:1000}
+    cache-ttl-minutes: ${OSM_CACHE_TTL_MINUTES:10}
+    max-retries: ${OSM_MAX_RETRIES:2}
+
+  # ---------------------------------------------------------------------------
+  # Cloudflare R2 / S3-Compatible Object Storage
+  # ---------------------------------------------------------------------------
+  storage:
+    provider: ${STORAGE_PROVIDER:s3}
+    endpoint: ${STORAGE_ENDPOINT} # e.g. https://<account_id>.r2.cloudflarestorage.com
+    access-key: ${STORAGE_ACCESS_KEY}
+    secret-key: ${STORAGE_SECRET_KEY}
+    bucket: ${STORAGE_BUCKET:accessmap-media}
+    region: ${STORAGE_REGION:auto}
+    public-url-prefix: ${STORAGE_PUBLIC_URL_PREFIX:}
+    presigned-url-expiry-minutes: ${STORAGE_PRESIGNED_URL_EXPIRY_MINUTES:60}
+    local-dir: ${STORAGE_LOCAL_DIR:/app/storage/media}
+    avatar:
+      max-size-bytes: 5242880       # 5 MB
+    report-evidence:
+      max-size-bytes: 10485760     # 10 MB
+
+  # ---------------------------------------------------------------------------
+  # AI Assistant Configuration
+  # ---------------------------------------------------------------------------
+  ai:
+    enabled: ${AI_ENABLED:true}
+    provider: ${AI_PROVIDER:mock} # 'openai-compatible' or 'mock'
+    base-url: ${AI_BASE_URL:https://api.openai.com/v1}
+    api-key: ${AI_API_KEY:}
+    model: ${AI_MODEL:gpt-4o-mini}
+    timeout-seconds: ${AI_TIMEOUT_SECONDS:15}
+    max-input-chars: 1000
+    max-output-tokens: 600
+    rate-limit-per-minute: 20
+
+# ---------------------------------------------------------------------------
+# Actuator Monitoring & Health Probes
+# ---------------------------------------------------------------------------
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      # Details restricted in production to prevent leaking infrastructure details
+      show-details: when-authorized
+      probes:
+        enabled: true
+  health:
+    livenessstate:
+      enabled: true
+    readinessstate:
+      enabled: true
+
+# ---------------------------------------------------------------------------
+# Production Logging (Secure: No sensitive data or raw SQL)
+# ---------------------------------------------------------------------------
+logging:
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+  level:
+    root: INFO
+    com.accessmap: INFO
+    org.springframework.security: WARN
+    org.hibernate.SQL: WARN
+    org.hibernate.type.descriptor.sql: WARN
+    io.minio: WARN
+

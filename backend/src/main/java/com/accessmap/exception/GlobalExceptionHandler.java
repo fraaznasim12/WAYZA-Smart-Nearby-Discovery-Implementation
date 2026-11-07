@@ -13,6 +13,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -24,6 +25,7 @@ import java.util.Map;
  * Stack traces and internal details are never exposed to API callers.
  */
 @RestControllerAdvice
+@Slf4j
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(ResourceNotFoundException.class)
@@ -36,6 +38,12 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<Void>> handleBadRequest(BadRequestException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(ApiResponse.error("BAD_REQUEST", ex.getMessage()));
+    }
+
+    @ExceptionHandler(org.springframework.http.converter.HttpMessageNotReadableException.class)
+    public ResponseEntity<ApiResponse<Void>> handleMessageNotReadable(org.springframework.http.converter.HttpMessageNotReadableException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ApiResponse.error("MALFORMED_JSON", "Request body is unreadable or malformed JSON"));
     }
 
     /**
@@ -99,10 +107,49 @@ public class GlobalExceptionHandler {
     }
 
     /**
+     * Handles ResponseStatusException (e.g. 429 TOO_MANY_REQUESTS).
+     */
+    @ExceptionHandler(org.springframework.web.server.ResponseStatusException.class)
+    public ResponseEntity<ApiResponse<Void>> handleResponseStatusException(org.springframework.web.server.ResponseStatusException ex) {
+        String code = ex.getStatusCode().toString();
+        String reason = ex.getReason() != null ? ex.getReason() : ex.getMessage();
+        return ResponseEntity.status(ex.getStatusCode())
+                .body(ApiResponse.error(code, reason));
+    }
+
+    /**
+     * Handles media upload / validation exceptions.
+     */
+    @ExceptionHandler(com.accessmap.service.MediaStorageService.MediaUploadException.class)
+    public ResponseEntity<ApiResponse<Void>> handleMediaUpload(com.accessmap.service.MediaStorageService.MediaUploadException ex) {
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
+                .body(ApiResponse.error("UPLOAD_ERROR", ex.getMessage()));
+    }
+
+    /**
+     * Handles multipart file size limit exceptions.
+     */
+    @ExceptionHandler(org.springframework.web.multipart.MaxUploadSizeExceededException.class)
+    public ResponseEntity<ApiResponse<Void>> handleMaxUploadSize(org.springframework.web.multipart.MaxUploadSizeExceededException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ApiResponse.error("FILE_TOO_LARGE", "File size exceeds the maximum allowed limit"));
+    }
+
+    /**
+     * Handles missing file parts in multipart requests.
+     */
+    @ExceptionHandler(org.springframework.web.multipart.support.MissingServletRequestPartException.class)
+    public ResponseEntity<ApiResponse<Void>> handleMissingRequestPart(org.springframework.web.multipart.support.MissingServletRequestPartException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ApiResponse.error("MISSING_FILE", "Required multipart file is missing"));
+    }
+
+    /**
      * Catch-all for unexpected exceptions. Never exposes stack traces to callers.
      */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Void>> handleGeneralException(Exception ex) {
+        log.error("Unhandled exception: ", ex);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(ApiResponse.error("INTERNAL_SERVER_ERROR", "An unexpected error occurred"));
     }

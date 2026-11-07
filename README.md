@@ -1,4 +1,4 @@
-﻿# 🗺️ AccessMap: Intelligent Physical Accessibility Discovery & Verification Platform
+# 🗺️ AccessMap: Intelligent Physical Accessibility Discovery & Verification Platform
 
 [![Accessibility: WCAG 2.1 AA](https://img.shields.io/badge/Accessibility-WCAG%202.1%20AA-0D9488?style=for-the-badge)](docs/PROJECT_RULES.md)
 [![Frontend: React + TypeScript + Vite](https://img.shields.io/badge/Frontend-React%20%2B%20TypeScript%20%2B%20Vite-61DAFB?style=for-the-badge&logo=react)](frontend/)
@@ -64,16 +64,17 @@ The platform is designed as a **Modular Monolith** comprising 10 distinct functi
 
 | Layer | Technology | Purpose |
 | :--- | :--- | :--- |
-| **Frontend Framework** | React 19 + TypeScript + Vite | Lightning-fast modern client runtime with strict static typing |
+| **Frontend Framework** | React 18 + TypeScript + Vite | Lightning-fast modern client runtime with strict static typing |
 | **Styling & UI** | Tailwind CSS v4 + Lucide React | High-contrast design system, utility-first responsive layout |
 | **Animation & 3D** | Framer Motion + Three.js + R3F + Drei | Smooth accessible transitions and progressive 3D spatial cutaways |
 | **Mapping Engine** | MapLibre GL JS | Open-source vector tile spatial maps |
-| **Networking & Routing** | Axios + React Router DOM v6 | Typed REST HTTP client and client-side routing |
+| **Networking & Routing** | Axios + React Router DOM v7 | Typed REST HTTP client and client-side routing |
 | **Backend Framework** | Java 21 + Spring Boot 3 | Enterprise-grade modular monolith REST API |
 | **Security** | Spring Security + JWT | Stateless role-based authentication and endpoint authorization |
 | **Persistence** | Spring Data JPA + Hibernate Spatial | Object-relational mapping with native spatial geometry support |
-| **Database** | PostgreSQL 16 + PostGIS 3.4 | High-performance spatial indexing (`GIST`) and geospatial queries |
-| **Containerization** | Docker + Docker Compose | Reproducible local and production infrastructure |
+| **Database** | PostgreSQL 16 + PostGIS 3.4 (Supabase) | High-performance spatial indexing (`GIST`) and geospatial queries |
+| **Object Storage** | Cloudflare R2 (S3-compatible) | EXIF-sanitized storage for avatars and report evidence photos |
+| **Cloud Hosting** | Vercel (Frontend) + Render (Backend) | Production edge CDN distribution and containerized web services |
 
 ---
 
@@ -97,6 +98,7 @@ AccessMap/
 
 ## 📖 Documentation Index
 
+* **[Production Deployment Guide](docs/DEPLOYMENT.md):** Cloud hosting architecture, Vercel, Render, Supabase, Cloudflare R2, security checklist, and step-by-step deployment instructions.
 * **[Engineering Rules & Standards](docs/PROJECT_RULES.md):** 13 mandatory principles covering code style, security, a11y, and solo development workflow.
 * **[Requirements Specification](docs/REQUIREMENTS.md):** Detailed breakdown of all 10 modules, functional requirements, and non-functional SLAs.
 * **[Implementation Roadmap](docs/ROADMAP.md):** Milestone-by-milestone implementation plan with verifiable checkpoints.
@@ -106,5 +108,5 @@ AccessMap/
 
 ## 🚀 Development Status
 
-* **Current Stage:** Phase 1 — Project Initialization & Architecture Baseline completed.
-* **Next Stage:** Phase 2 — Database Schema & Containerized Infrastructure (Docker + PostGIS).
+* **Current Stage:** Phase 16 — Production Deployment & Cloud Hosting Preparation completed.
+* **Hosting Targets:** Vercel (Frontend), Render Docker (Backend), Supabase (PostgreSQL + PostGIS), Cloudflare R2 (Media Storage).

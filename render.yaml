@@ -1,0 +1,58 @@
+# =============================================================================
+# AccessMap — Render Blueprint Specification (render.yaml)
+# =============================================================================
+# Infrastructure-as-Code for deploying AccessMap backend to Render.
+# =============================================================================
+
+services:
+  - type: web
+    name: accessmap-backend
+    env: docker
+    dockerfilePath: backend/Dockerfile
+    dockerContext: backend
+    plan: free
+    region: oregon # or frankfurt, singapore, etc.
+    healthCheckPath: /actuator/health
+    autoDeploy: false
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod
+      # Supabase Connection URL (provided as a secret in Render Dashboard)
+      - key: DB_URL
+        sync: false
+      - key: DB_USER
+        value: postgres
+      - key: DB_PASSWORD
+        sync: false
+      # JWT Signing Key (minimum 256 bits, required)
+      - key: JWT_SECRET
+        generateValue: true
+      # Frontend CORS Allowed Origins
+      - key: CORS_ORIGINS
+        value: https://accessmap.vercel.app
+      # Cloudflare R2 / S3 Object Storage Configuration
+      - key: STORAGE_PROVIDER
+        value: s3
+      - key: STORAGE_ENDPOINT
+        sync: false
+      - key: STORAGE_ACCESS_KEY
+        sync: false
+      - key: STORAGE_SECRET_KEY
+        sync: false
+      - key: STORAGE_BUCKET
+        value: accessmap-media
+      - key: STORAGE_REGION
+        value: auto
+      - key: STORAGE_PUBLIC_URL_PREFIX
+        sync: false
+      # OpenStreetMap Integration
+      - key: OSM_ENABLED
+        value: "true"
+      # AI Assistant
+      - key: AI_ENABLED
+        value: "true"
+      - key: AI_PROVIDER
+        value: mock
+      - key: AI_API_KEY
+        sync: false
+

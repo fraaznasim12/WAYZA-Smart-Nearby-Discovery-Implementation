@@ -16,6 +16,7 @@ export interface UserProfile {
   fullName: string;
   role: UserRole;
   memberSince?: string;
+  avatarUrl?: string | null;
 }
 
 export interface AuthResponseData {

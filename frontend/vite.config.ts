@@ -9,8 +9,14 @@ export default defineConfig({
     tailwindcss(),
   ],
   server: {
-    port: 5173,
+    port: 5174,
     open: false,
+    proxy: {
+      '/api': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+      },
+    },
   },
   build: {
     // Suppress chunk size warnings — 3D (Three.js) and map (MapLibre) bundles are expected to be large.

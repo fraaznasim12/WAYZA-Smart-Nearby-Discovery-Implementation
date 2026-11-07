@@ -54,6 +54,23 @@ public class User implements UserDetails {
     @Builder.Default
     private Boolean isEnabled = true;
 
+    /**
+     * Object key of the user's current profile photo within the storage bucket.
+     * Null when no avatar has been uploaded.
+     * Example: {@code "avatars/550e8400-e29b-41d4-a716-446655440000.webp"}
+     */
+    @Column(name = "avatar_object_key", length = 500)
+    private String avatarObjectKey;
+
+    /**
+     * FK to the media_files record for the current avatar.
+     * Null when no avatar has been uploaded.
+     * Lazy-loaded to avoid joins on every principal resolution.
+     */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "avatar_media_id")
+    private MediaFile avatarMedia;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private OffsetDateTime createdAt;

@@ -12,6 +12,8 @@ public record PlaceCreateRequest(
     @NotBlank(message = "Venue name is required")
     String name,
 
+    String description,
+
     @NotBlank(message = "Category is required")
     String category,
 
@@ -19,6 +21,10 @@ public record PlaceCreateRequest(
     String address,
 
     String city,
+
+    String state,
+
+    String postalCode,
 
     String country,
 
@@ -36,4 +42,3 @@ public record PlaceCreateRequest(
 
     String website
 ) {}
-

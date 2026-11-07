@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { NavLink, Link, useNavigate } from 'react-router-dom';
-import { Compass, Menu, X, ArrowRight, Sparkles, User, LogOut, ShieldCheck } from 'lucide-react';
+import { Compass, Menu, X, ArrowRight, Sparkles, User, LogOut, ShieldCheck, ShieldAlert, Building2, Bell } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { NotificationBell } from '../notifications/NotificationBell';
 
 export const Navbar: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -25,15 +26,20 @@ export const Navbar: React.FC = () => {
   const navLinks = [
     { to: '/', label: 'Home' },
     { to: '/explore', label: 'Explore Places' },
+    { to: '/assistant', label: 'AI Assistant', isAi: true },
     { to: '/how-it-works', label: 'How It Works' },
     { to: '/about', label: 'About' },
     { to: '/contact', label: 'Contact' },
+    ...(isAuthenticated ? [{ to: '/reports', label: 'My Reports' }] : []),
+    ...(isAuthenticated ? [{ to: '/my-disputes', label: 'My Disputes' }] : []),
+    ...(isAuthenticated && user?.role === 'ROLE_ADMIN' ? [{ to: '/admin', label: 'Admin Console' }] : []),
+    ...(isAuthenticated && (user?.role === 'ROLE_BUSINESS' || user?.role === 'ROLE_BUSINESS_OWNER') ? [{ to: '/business', label: 'Business Portal' }] : []),
   ];
 
   return (
-    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-2xs">
+    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-[#D9E2EC] shadow-2xs">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-20">
+        <div className="flex items-center justify-between h-18">
           
           {/* Logo & Brand Identity */}
           <Link 
@@ -42,41 +48,46 @@ export const Navbar: React.FC = () => {
             aria-label="AccessMap Home"
             onClick={closeMobileMenu}
           >
-            <div className="w-11 h-11 rounded-xl bg-teal-600 flex items-center justify-center text-white shadow-md shadow-teal-600/20 group-hover:bg-teal-700 transition-colors">
-              <Compass className="w-6 h-6 transition-transform group-hover:rotate-45" aria-hidden="true" />
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#102A43] to-[#0F766E] flex items-center justify-center text-white shadow-md shadow-slate-900/10 group-hover:shadow-teal-900/20 transition-all">
+              <Compass className="w-5 h-5 transition-transform duration-300 group-hover:rotate-45" aria-hidden="true" />
             </div>
             <div className="flex flex-col">
               <div className="flex items-center gap-2">
-                <span className="text-xl font-bold tracking-tight text-slate-900 group-hover:text-teal-700 transition-colors">
+                <span className="text-xl font-extrabold tracking-tight text-[#102A43] group-hover:text-[#0F766E] transition-colors">
                   AccessMap
                 </span>
-                <span className="hidden sm:inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-teal-50 text-teal-700 border border-teal-200">
+                <span className="hidden sm:inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#E8F5F1] text-[#0F766E] border border-[#0F766E]/20">
                   <Sparkles className="w-2.5 h-2.5" />
                   Live Platform
                 </span>
               </div>
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-teal-700">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-[#0F766E]">
                 Verified Physical Accessibility
               </span>
             </div>
           </Link>
 
           {/* Desktop Navigation Links */}
-          <nav className="hidden md:flex items-center gap-1 lg:gap-2" aria-label="Main Navigation">
+          <nav className="hidden lg:flex items-center gap-1 xl:gap-1.5" aria-label="Main Navigation">
             {navLinks.map((link) => (
               <NavLink
                 key={link.to}
                 to={link.to}
                 end={link.to === '/'}
                 className={({ isActive }) =>
-                  `px-3 py-2 rounded-xl text-sm font-semibold transition-all cursor-pointer ${
+                  `px-3 py-1.5 rounded-xl text-xs font-semibold transition-all inline-flex items-center gap-1.5 cursor-pointer ${
                     isActive
-                      ? 'text-teal-700 bg-teal-50/80 shadow-2xs border border-teal-200/80'
-                      : 'text-slate-700 hover:text-slate-900 hover:bg-slate-100/80'
+                      ? 'text-[#0F766E] bg-[#E8F5F1] font-bold border border-[#0F766E]/30 shadow-2xs'
+                      : 'text-[#486581] hover:text-[#102A43] hover:bg-slate-100/70'
                   }`
                 }
               >
-                {link.label}
+                <span>{link.label}</span>
+                {'isAi' in link && (
+                  <span className="px-1.5 py-0.2 rounded-md bg-purple-100 text-purple-700 font-extrabold text-[9px] uppercase tracking-wider">
+                    AI
+                  </span>
+                )}
               </NavLink>
             ))}
           </nav>
@@ -85,19 +96,20 @@ export const Navbar: React.FC = () => {
           <div className="hidden md:flex items-center gap-3">
             {isAuthenticated && user ? (
               <div className="flex items-center gap-3">
+                <NotificationBell />
                 <Link
                   to="/dashboard"
-                  className="flex items-center gap-2.5 px-3.5 py-1.5 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 transition-colors"
+                  className="flex items-center gap-2.5 px-3 py-1.5 rounded-xl bg-slate-50 hover:bg-slate-100 border border-[#D9E2EC] transition-colors"
                   aria-label="User Dashboard"
                 >
-                  <div className="w-8 h-8 rounded-lg bg-teal-600 text-white flex items-center justify-center font-bold text-xs">
+                  <div className="w-7 h-7 rounded-lg bg-[#0F766E] text-white flex items-center justify-center font-bold text-xs">
                     {user.fullName ? user.fullName.charAt(0).toUpperCase() : <User className="w-4 h-4" />}
                   </div>
                   <div className="flex flex-col text-left">
-                    <span className="text-xs font-bold text-slate-900 leading-tight max-w-[120px] truncate">
+                    <span className="text-xs font-bold text-[#172B3A] leading-tight max-w-[120px] truncate">
                       {user.fullName}
                     </span>
-                    <span className="text-[10px] font-medium text-teal-700 leading-tight flex items-center gap-1">
+                    <span className="text-[10px] font-semibold text-[#0F766E] leading-tight flex items-center gap-1">
                       <ShieldCheck className="w-2.5 h-2.5" />
                       {user.role.replace('ROLE_', '')}
                     </span>
@@ -107,35 +119,35 @@ export const Navbar: React.FC = () => {
                 <button
                   type="button"
                   onClick={handleLogout}
-                  className="p-2 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-colors cursor-pointer"
+                  className="p-2 text-[#486581] hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-colors cursor-pointer"
                   title="Sign Out"
                   aria-label="Sign Out"
                 >
-                  <LogOut className="w-5 h-5" />
+                  <LogOut className="w-4.5 h-4.5" />
                 </button>
               </div>
             ) : (
               <>
                 <Link 
                   to="/login"
-                  className="px-4 py-2 text-sm font-semibold text-slate-700 hover:text-slate-900 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer"
+                  className="px-3.5 py-2 text-xs font-bold text-[#172B3A] hover:text-[#0F766E] hover:bg-slate-100 rounded-xl transition-colors cursor-pointer"
                 >
                   Sign In
                 </Link>
                 <button 
                   type="button"
                   onClick={() => navigate('/register')}
-                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-teal-600 text-white text-sm font-semibold shadow-md shadow-teal-600/20 hover:bg-teal-700 hover:shadow-lg transition-all cursor-pointer"
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#0F766E] text-white text-xs font-bold shadow-xs hover:bg-[#115E59] hover:shadow-md transition-all cursor-pointer"
                 >
                   <span>Get Started</span>
-                  <ArrowRight className="w-4 h-4" aria-hidden="true" />
+                  <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
                 </button>
               </>
             )}
           </div>
 
           {/* Mobile Menu Button */}
-          <div className="flex md:hidden">
+          <div className="flex lg:hidden">
             <button
               type="button"
               onClick={toggleMobileMenu}
@@ -191,12 +203,40 @@ export const Navbar: React.FC = () => {
                   </div>
                 </div>
                 <Link
+                  to="/notifications"
+                  onClick={closeMobileMenu}
+                  className="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold text-slate-700 border border-slate-200 rounded-xl hover:bg-slate-50"
+                >
+                  <Bell className="w-4 h-4 text-teal-600" />
+                  <span>Notifications</span>
+                </Link>
+                <Link
                   to="/dashboard"
                   onClick={closeMobileMenu}
                   className="w-full block text-center px-4 py-2 text-sm font-semibold text-slate-700 border border-slate-200 rounded-xl hover:bg-slate-50"
                 >
                   My Dashboard
                 </Link>
+                {user.role === 'ROLE_ADMIN' && (
+                  <Link
+                    to="/admin"
+                    onClick={closeMobileMenu}
+                    className="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold text-teal-800 bg-teal-50 border border-teal-200 rounded-xl hover:bg-teal-100"
+                  >
+                    <ShieldAlert className="w-4 h-4 text-teal-700" />
+                    <span>Admin Moderation Console</span>
+                  </Link>
+                )}
+                {(user.role === 'ROLE_BUSINESS' || user.role === 'ROLE_BUSINESS_OWNER') && (
+                  <Link
+                    to="/business"
+                    onClick={closeMobileMenu}
+                    className="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold text-teal-800 bg-teal-50 border border-teal-200 rounded-xl hover:bg-teal-100"
+                  >
+                    <Building2 className="w-4 h-4 text-teal-700" />
+                    <span>Business Facility Portal</span>
+                  </Link>
+                )}
                 <button
                   type="button"
                   onClick={handleLogout}

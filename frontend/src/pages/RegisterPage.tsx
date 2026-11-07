@@ -1,6 +1,19 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Lock, Mail, User, ArrowRight, Compass, Eye, EyeOff, AlertCircle, CheckCircle2 } from 'lucide-react';
+import {
+  Lock,
+  Mail,
+  User,
+  ArrowRight,
+  Eye,
+  EyeOff,
+  AlertCircle,
+  CheckCircle2,
+  Compass,
+  Check,
+  Building2,
+  MapPin,
+} from 'lucide-react';
 import { PageLayout } from '../components/layout/PageLayout';
 import { useAuth } from '../context/AuthContext';
 import { AxiosError } from 'axios';
@@ -71,7 +84,7 @@ export const RegisterPage: React.FC = () => {
       setIsSuccess(true);
       setTimeout(() => {
         navigate('/dashboard');
-      }, 1200);
+      }, 1000);
     } catch (err: unknown) {
       if (err instanceof AxiosError && err.response?.data) {
         const apiError = err.response.data as ApiResponse<unknown>;
@@ -88,230 +101,297 @@ export const RegisterPage: React.FC = () => {
   };
 
   return (
-    <PageLayout className="flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full bg-white p-8 sm:p-10 rounded-3xl border border-slate-200 shadow-sm">
+    <PageLayout className="min-h-[calc(100vh-144px)] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-[#F7F9FC]">
+      <div className="max-w-4xl w-full grid grid-cols-1 lg:grid-cols-12 bg-white rounded-3xl border border-slate-200/90 shadow-xl overflow-hidden">
         
-        {/* Header */}
-        <div className="text-center mb-8">
-          <div className="w-12 h-12 rounded-2xl bg-teal-600 flex items-center justify-center text-white mx-auto mb-4 shadow-md shadow-teal-600/20">
-            <Compass className="w-7 h-7" aria-hidden="true" />
+        {/* Left Side: Community Mission Showcase */}
+        <div className="lg:col-span-5 bg-gradient-to-br from-[#102A43] via-[#102A43] to-[#0F766E] p-8 sm:p-10 text-white flex flex-col justify-between relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-[#10B981]/10 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute bottom-0 left-0 w-48 h-48 bg-[#0F766E]/20 rounded-full blur-2xl pointer-events-none" />
+
+          <div className="relative z-10">
+            <Link to="/" className="inline-flex items-center gap-2.5 mb-8 group">
+              <div className="w-10 h-10 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white group-hover:scale-105 transition-transform">
+                <Compass className="w-6 h-6 text-emerald-300" />
+              </div>
+              <div>
+                <span className="font-bold text-lg tracking-tight text-white font-display">AccessMap</span>
+                <span className="block text-[10px] text-emerald-300 font-semibold tracking-wider uppercase">
+                  Physical Inclusivity
+                </span>
+              </div>
+            </Link>
+
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight leading-tight mb-3 font-display">
+              Build an accessible world together.
+            </h2>
+            <p className="text-sm text-slate-300 leading-relaxed font-normal">
+              Join thousands of community auditors, wheelchair users, and venue owners cataloguing ground-truth physical accessibility data.
+            </p>
           </div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Create your AccessMap Account</h1>
-          <p className="text-xs text-slate-500 mt-1">Join our verified physical accessibility community</p>
+
+          <div className="relative z-10 pt-8 mt-8 border-t border-white/10 space-y-4">
+            <div className="flex items-start gap-3 text-xs text-slate-200">
+              <div className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-300 flex items-center justify-center shrink-0 mt-0.5">
+                <Check className="w-3.5 h-3.5" />
+              </div>
+              <div>
+                <strong className="text-white block font-medium">Verified Field Audits</strong>
+                <span className="text-slate-300 text-[11px]">Submit observations with photos for administrator review</span>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3 text-xs text-slate-200">
+              <div className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-300 flex items-center justify-center shrink-0 mt-0.5">
+                <Building2 className="w-3.5 h-3.5" />
+              </div>
+              <div>
+                <strong className="text-white block font-medium">Business Venue Claims</strong>
+                <span className="text-slate-300 text-[11px]">Claim official ownership of your business facilities</span>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3 text-xs text-slate-200">
+              <div className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-300 flex items-center justify-center shrink-0 mt-0.5">
+                <MapPin className="w-3.5 h-3.5" />
+              </div>
+              <div>
+                <strong className="text-white block font-medium">Personalized Accessibility</strong>
+                <span className="text-slate-300 text-[11px]">Save preferences for elevators, ramps, and restrooms</span>
+              </div>
+            </div>
+          </div>
         </div>
 
-        {/* Global Error Banner */}
-        {errorMessage && (
-          <div
-            role="alert"
-            className="mb-6 p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-start gap-2.5 animate-in fade-in duration-150"
-          >
-            <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" aria-hidden="true" />
-            <span className="font-medium">{errorMessage}</span>
+        {/* Right Side: Account Registration Form */}
+        <div className="lg:col-span-7 p-8 sm:p-12 flex flex-col justify-center">
+          
+          <div className="mb-6">
+            <h1 className="text-2xl font-bold text-[#172B3A] tracking-tight font-display">
+              Create your account
+            </h1>
+            <p className="text-xs text-[#486581] mt-1">
+              Join the AccessMap community to discover and review accessible places
+            </p>
           </div>
-        )}
 
-        {/* Success Banner */}
-        {isSuccess && (
-          <div
-            role="status"
-            className="mb-6 p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-start gap-2.5 animate-in fade-in duration-150"
-          >
-            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" aria-hidden="true" />
-            <span className="font-medium">Account created successfully! Redirecting to your dashboard...</span>
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} noValidate className="space-y-4">
-          {/* Full Name */}
-          <div>
-            <label
-              htmlFor="reg-name"
-              className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5"
+          {/* Global Error Banner */}
+          {errorMessage && (
+            <div
+              role="alert"
+              className="mb-5 p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-start gap-2.5 animate-in fade-in duration-150"
             >
-              Full Name
-            </label>
-            <div className="relative">
-              <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" aria-hidden="true" />
-              <input
-                id="reg-name"
-                name="fullName"
-                type="text"
-                autoComplete="name"
-                required
-                disabled={isLoading || isSuccess}
-                value={fullName}
-                onChange={(e) => {
-                  setFullName(e.target.value);
-                  if (fieldErrors.fullName) setFieldErrors((prev) => ({ ...prev, fullName: '' }));
-                }}
-                placeholder="Jane Doe"
-                aria-invalid={!!fieldErrors.fullName}
-                aria-describedby={fieldErrors.fullName ? 'reg-name-error' : undefined}
-                className={`w-full pl-10 pr-4 py-2.5 rounded-xl border text-sm transition-colors focus:outline-hidden focus:ring-2 focus:ring-teal-500 ${
-                  fieldErrors.fullName ? 'border-rose-400 bg-rose-50/20' : 'border-slate-300 focus:border-teal-600'
-                }`}
-              />
+              <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" aria-hidden="true" />
+              <span className="font-medium">{errorMessage}</span>
             </div>
-            {fieldErrors.fullName && (
-              <p id="reg-name-error" className="text-[11px] font-semibold text-rose-600 mt-1">
-                {fieldErrors.fullName}
-              </p>
-            )}
-          </div>
+          )}
 
-          {/* Email Address */}
-          <div>
-            <label
-              htmlFor="reg-email"
-              className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5"
+          {/* Success Banner */}
+          {isSuccess && (
+            <div
+              role="status"
+              className="mb-5 p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-start gap-2.5 animate-in fade-in duration-150"
             >
-              Email Address
-            </label>
-            <div className="relative">
-              <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" aria-hidden="true" />
-              <input
-                id="reg-email"
-                name="email"
-                type="email"
-                autoComplete="email"
-                required
-                disabled={isLoading || isSuccess}
-                value={email}
-                onChange={(e) => {
-                  setEmail(e.target.value);
-                  if (fieldErrors.email) setFieldErrors((prev) => ({ ...prev, email: '' }));
-                }}
-                placeholder="jane@example.com"
-                aria-invalid={!!fieldErrors.email}
-                aria-describedby={fieldErrors.email ? 'reg-email-error' : undefined}
-                className={`w-full pl-10 pr-4 py-2.5 rounded-xl border text-sm transition-colors focus:outline-hidden focus:ring-2 focus:ring-teal-500 ${
-                  fieldErrors.email ? 'border-rose-400 bg-rose-50/20' : 'border-slate-300 focus:border-teal-600'
-                }`}
-              />
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" aria-hidden="true" />
+              <span className="font-medium">Account created successfully! Redirecting to your dashboard...</span>
             </div>
-            {fieldErrors.email && (
-              <p id="reg-email-error" className="text-[11px] font-semibold text-rose-600 mt-1">
-                {fieldErrors.email}
-              </p>
-            )}
-          </div>
+          )}
 
-          {/* Password */}
-          <div>
-            <label
-              htmlFor="reg-password"
-              className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5"
-            >
-              Password <span className="text-slate-400 font-normal">(min. 8 characters)</span>
-            </label>
-            <div className="relative">
-              <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" aria-hidden="true" />
-              <input
-                id="reg-password"
-                name="password"
-                type={showPassword ? 'text' : 'password'}
-                autoComplete="new-password"
-                required
-                disabled={isLoading || isSuccess}
-                value={password}
-                onChange={(e) => {
-                  setPassword(e.target.value);
-                  if (fieldErrors.password) setFieldErrors((prev) => ({ ...prev, password: '' }));
-                }}
-                placeholder="••••••••"
-                aria-invalid={!!fieldErrors.password}
-                aria-describedby={fieldErrors.password ? 'reg-password-error' : undefined}
-                className={`w-full pl-10 pr-10 py-2.5 rounded-xl border text-sm transition-colors focus:outline-hidden focus:ring-2 focus:ring-teal-500 ${
-                  fieldErrors.password ? 'border-rose-400 bg-rose-50/20' : 'border-slate-300 focus:border-teal-600'
-                }`}
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword((prev) => !prev)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1 cursor-pointer"
-                aria-label={showPassword ? 'Hide password' : 'Show password'}
+          <form onSubmit={handleSubmit} noValidate className="space-y-4">
+            {/* Full Name */}
+            <div>
+              <label
+                htmlFor="reg-name"
+                className="block text-xs font-bold uppercase tracking-wider text-[#172B3A] mb-1.5"
               >
-                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-              </button>
+                Full Name
+              </label>
+              <div className="relative">
+                <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" aria-hidden="true" />
+                <input
+                  id="reg-name"
+                  name="fullName"
+                  type="text"
+                  autoComplete="name"
+                  required
+                  disabled={isLoading || isSuccess}
+                  value={fullName}
+                  onChange={(e) => {
+                    setFullName(e.target.value);
+                    if (fieldErrors.fullName) setFieldErrors((prev) => ({ ...prev, fullName: '' }));
+                  }}
+                  placeholder="e.g. Maya Sharma"
+                  aria-invalid={!!fieldErrors.fullName}
+                  aria-describedby={fieldErrors.fullName ? 'reg-name-error' : undefined}
+                  className={`w-full pl-10 pr-4 py-2.5 rounded-xl border text-sm transition-colors focus:outline-hidden focus:ring-2 focus:ring-[#0F766E] ${
+                    fieldErrors.fullName ? 'border-rose-400 bg-rose-50/20' : 'border-slate-300 focus:border-[#0F766E]'
+                  }`}
+                />
+              </div>
+              {fieldErrors.fullName && (
+                <p id="reg-name-error" className="text-[11px] font-semibold text-rose-600 mt-1">
+                  {fieldErrors.fullName}
+                </p>
+              )}
             </div>
-            {fieldErrors.password && (
-              <p id="reg-password-error" className="text-[11px] font-semibold text-rose-600 mt-1">
-                {fieldErrors.password}
-              </p>
-            )}
-          </div>
 
-          {/* Confirm Password */}
-          <div>
-            <label
-              htmlFor="reg-confirm-password"
-              className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5"
-            >
-              Confirm Password
-            </label>
-            <div className="relative">
-              <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" aria-hidden="true" />
-              <input
-                id="reg-confirm-password"
-                name="confirmPassword"
-                type={showConfirmPassword ? 'text' : 'password'}
-                autoComplete="new-password"
-                required
-                disabled={isLoading || isSuccess}
-                value={confirmPassword}
-                onChange={(e) => {
-                  setConfirmPassword(e.target.value);
-                  if (fieldErrors.confirmPassword) setFieldErrors((prev) => ({ ...prev, confirmPassword: '' }));
-                }}
-                placeholder="••••••••"
-                aria-invalid={!!fieldErrors.confirmPassword}
-                aria-describedby={fieldErrors.confirmPassword ? 'reg-confirm-password-error' : undefined}
-                className={`w-full pl-10 pr-10 py-2.5 rounded-xl border text-sm transition-colors focus:outline-hidden focus:ring-2 focus:ring-teal-500 ${
-                  fieldErrors.confirmPassword ? 'border-rose-400 bg-rose-50/20' : 'border-slate-300 focus:border-teal-600'
-                }`}
-              />
-              <button
-                type="button"
-                onClick={() => setShowConfirmPassword((prev) => !prev)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1 cursor-pointer"
-                aria-label={showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'}
+            {/* Email Address */}
+            <div>
+              <label
+                htmlFor="reg-email"
+                className="block text-xs font-bold uppercase tracking-wider text-[#172B3A] mb-1.5"
               >
-                {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-              </button>
+                Email Address
+              </label>
+              <div className="relative">
+                <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" aria-hidden="true" />
+                <input
+                  id="reg-email"
+                  name="email"
+                  type="email"
+                  autoComplete="email"
+                  required
+                  disabled={isLoading || isSuccess}
+                  value={email}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    if (fieldErrors.email) setFieldErrors((prev) => ({ ...prev, email: '' }));
+                  }}
+                  placeholder="maya@example.com"
+                  aria-invalid={!!fieldErrors.email}
+                  aria-describedby={fieldErrors.email ? 'reg-email-error' : undefined}
+                  className={`w-full pl-10 pr-4 py-2.5 rounded-xl border text-sm transition-colors focus:outline-hidden focus:ring-2 focus:ring-[#0F766E] ${
+                    fieldErrors.email ? 'border-rose-400 bg-rose-50/20' : 'border-slate-300 focus:border-[#0F766E]'
+                  }`}
+                />
+              </div>
+              {fieldErrors.email && (
+                <p id="reg-email-error" className="text-[11px] font-semibold text-rose-600 mt-1">
+                  {fieldErrors.email}
+                </p>
+              )}
             </div>
-            {fieldErrors.confirmPassword && (
-              <p id="reg-confirm-password-error" className="text-[11px] font-semibold text-rose-600 mt-1">
-                {fieldErrors.confirmPassword}
-              </p>
-            )}
+
+            {/* Password */}
+            <div>
+              <div className="flex items-center justify-between mb-1.5">
+                <label
+                  htmlFor="reg-password"
+                  className="block text-xs font-bold uppercase tracking-wider text-[#172B3A]"
+                >
+                  Password
+                </label>
+                <span className="text-[11px] text-[#486581]">min. 8 characters</span>
+              </div>
+              <div className="relative">
+                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" aria-hidden="true" />
+                <input
+                  id="reg-password"
+                  name="password"
+                  type={showPassword ? 'text' : 'password'}
+                  autoComplete="new-password"
+                  required
+                  disabled={isLoading || isSuccess}
+                  value={password}
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    if (fieldErrors.password) setFieldErrors((prev) => ({ ...prev, password: '' }));
+                  }}
+                  placeholder="••••••••"
+                  aria-invalid={!!fieldErrors.password}
+                  aria-describedby={fieldErrors.password ? 'reg-password-error' : undefined}
+                  className={`w-full pl-10 pr-10 py-2.5 rounded-xl border text-sm transition-colors focus:outline-hidden focus:ring-2 focus:ring-[#0F766E] ${
+                    fieldErrors.password ? 'border-rose-400 bg-rose-50/20' : 'border-slate-300 focus:border-[#0F766E]'
+                  }`}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1 cursor-pointer focus:outline-hidden focus:ring-2 focus:ring-[#0F766E] rounded-md"
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+              {fieldErrors.password && (
+                <p id="reg-password-error" className="text-[11px] font-semibold text-rose-600 mt-1">
+                  {fieldErrors.password}
+                </p>
+              )}
+            </div>
+
+            {/* Confirm Password */}
+            <div>
+              <label
+                htmlFor="reg-confirm-password"
+                className="block text-xs font-bold uppercase tracking-wider text-[#172B3A] mb-1.5"
+              >
+                Confirm Password
+              </label>
+              <div className="relative">
+                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" aria-hidden="true" />
+                <input
+                  id="reg-confirm-password"
+                  name="confirmPassword"
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  autoComplete="new-password"
+                  required
+                  disabled={isLoading || isSuccess}
+                  value={confirmPassword}
+                  onChange={(e) => {
+                    setConfirmPassword(e.target.value);
+                    if (fieldErrors.confirmPassword) setFieldErrors((prev) => ({ ...prev, confirmPassword: '' }));
+                  }}
+                  placeholder="••••••••"
+                  aria-invalid={!!fieldErrors.confirmPassword}
+                  aria-describedby={fieldErrors.confirmPassword ? 'reg-confirm-password-error' : undefined}
+                  className={`w-full pl-10 pr-10 py-2.5 rounded-xl border text-sm transition-colors focus:outline-hidden focus:ring-2 focus:ring-[#0F766E] ${
+                    fieldErrors.confirmPassword ? 'border-rose-400 bg-rose-50/20' : 'border-slate-300 focus:border-[#0F766E]'
+                  }`}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword((prev) => !prev)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1 cursor-pointer focus:outline-hidden focus:ring-2 focus:ring-[#0F766E] rounded-md"
+                  aria-label={showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'}
+                >
+                  {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+              {fieldErrors.confirmPassword && (
+                <p id="reg-confirm-password-error" className="text-[11px] font-semibold text-rose-600 mt-1">
+                  {fieldErrors.confirmPassword}
+                </p>
+              )}
+            </div>
+
+            {/* Submit Button */}
+            <button
+              type="submit"
+              disabled={isLoading || isSuccess}
+              className="w-full mt-3 inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-[#0F766E] hover:bg-[#0c615a] active:bg-[#094d48] text-white font-semibold text-sm shadow-md shadow-[#0F766E]/20 transition-all cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed focus:outline-hidden focus:ring-2 focus:ring-offset-2 focus:ring-[#0F766E]"
+            >
+              {isLoading ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <span>Creating Account...</span>
+                </>
+              ) : (
+                <>
+                  <span>Create Account</span>
+                  <ArrowRight className="w-4 h-4" aria-hidden="true" />
+                </>
+              )}
+            </button>
+          </form>
+
+          <div className="mt-6 pt-6 border-t border-slate-100 flex items-center justify-between text-xs text-[#486581]">
+            <span>Already have an account?</span>
+            <Link to="/login" className="text-[#0F766E] hover:text-[#0c615a] font-bold">
+              Sign in here
+            </Link>
           </div>
 
-          {/* Submit Button */}
-          <button
-            type="submit"
-            disabled={isLoading || isSuccess}
-            className="w-full mt-3 inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-semibold text-sm shadow-md shadow-teal-600/20 transition-all cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
-          >
-            {isLoading ? (
-              <>
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                <span>Creating Account...</span>
-              </>
-            ) : (
-              <>
-                <span>Create Account</span>
-                <ArrowRight className="w-4 h-4" aria-hidden="true" />
-              </>
-            )}
-          </button>
-        </form>
-
-        <div className="mt-6 pt-6 border-t border-slate-100 text-center text-xs text-slate-600">
-          <span>Already have an account? </span>
-          <Link to="/login" className="text-teal-700 hover:text-teal-800 font-bold">
-            Sign in here
-          </Link>
         </div>
 
       </div>

@@ -5,7 +5,6 @@ import com.accessmap.dto.LoginRequest;
 import com.accessmap.dto.RegisterRequest;
 import com.accessmap.entity.User;
 import com.accessmap.entity.UserRole;
-import com.accessmap.exception.BadRequestException;
 import com.accessmap.repository.UserRepository;
 import com.accessmap.service.AuthService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -22,8 +21,8 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.transaction.annotation.Transactional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.options;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -335,7 +334,7 @@ class AuthIntegrationTest {
     @Test
     @DisplayName("CORS — preflight request from allowed origin returns 200 and Access-Control-Allow-Origin")
     void cors_preflightAllowedOrigin() throws Exception {
-        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.options(LOGIN_URL)
+        mockMvc.perform(options(LOGIN_URL)
                 .header("Origin", "http://localhost:5174")
                 .header("Access-Control-Request-Method", "POST")
                 .header("Access-Control-Request-Headers", "Content-Type,Authorization"))
@@ -347,11 +346,10 @@ class AuthIntegrationTest {
     @Test
     @DisplayName("CORS — preflight request from untrusted origin does NOT return Access-Control-Allow-Origin")
     void cors_untrustedOrigin() throws Exception {
-        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.options(LOGIN_URL)
+        mockMvc.perform(options(LOGIN_URL)
                 .header("Origin", "http://evil-attacker.com")
                 .header("Access-Control-Request-Method", "POST")
                 .header("Access-Control-Request-Headers", "Content-Type,Authorization"))
                 .andExpect(status().isForbidden());
     }
 }
-

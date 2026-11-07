@@ -1,5 +1,22 @@
 @import "tailwindcss";
 
+@theme {
+  --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-display: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
+
+  --color-primary: #102A43;
+  --color-primary-hover: #1E3A5F;
+  --color-secondary: #0F766E;
+  --color-secondary-hover: #115E59;
+  --color-accent: #10B981;
+  --color-mint: #E8F5F1;
+  --color-surface: #FFFFFF;
+  --color-app-bg: #F7F9FC;
+  --color-text-main: #172B3A;
+  --color-text-muted: #486581;
+  --color-border-main: #D9E2EC;
+}
+
 @layer base {
   *,
   ::after,
@@ -14,6 +31,9 @@
     scroll-behavior: smooth;
     -webkit-text-size-adjust: 100%;
     tab-size: 4;
+    font-family: var(--font-sans);
+    background-color: #F7F9FC;
+    color: #172B3A;
   }
 
   body {
@@ -21,22 +41,24 @@
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    background-color: #F7F9FC;
+    color: #172B3A;
   }
 
-  /* Accessible Focus Rings (WCAG 2.1 AA - 2.4.7 Focus Visible & 2.4.11 Focus Appearance) */
+  /* Accessible Focus Rings (WCAG 2.2 AA - 2.4.7 Focus Visible & 2.4.11 Focus Appearance) */
   :focus-visible {
-    outline: 2px solid #0d9488;
+    outline: 2px solid #0F766E;
     outline-offset: 2px;
   }
 
   /* Accessible Text Selection Highlight */
   ::selection {
-    background-color: #0d9488;
+    background-color: #0F766E;
     color: #ffffff;
   }
 }
 
-/* Reduced Motion Support (WCAG 2.1 AA - 2.3.3 Animation from Interactions) */
+/* Reduced Motion Support (WCAG 2.2 AA - 2.3.3 Animation from Interactions) */
 @media (prefers-reduced-motion: reduce) {
   *,
   ::before,
@@ -46,4 +68,20 @@
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+/* Custom subtle scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #F1F5F9;
+}
+::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94A3B8;
 }

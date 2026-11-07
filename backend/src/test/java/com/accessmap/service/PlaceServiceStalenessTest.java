@@ -26,6 +26,9 @@ class PlaceServiceStalenessTest {
     @Mock
     private PlaceRepository placeRepository;
 
+    @Mock
+    private org.springframework.core.env.Environment environment;
+
     @InjectMocks
     private PlaceService placeService;
 

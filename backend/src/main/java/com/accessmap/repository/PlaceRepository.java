@@ -4,37 +4,21 @@ import com.accessmap.entity.Place;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
  * Spring Data JPA Repository for {@link Place} entities.
- *
- * <p>Extends {@link JpaRepository} to inherit standard CRUD and pagination operations.
- * Custom PostGIS spatial proximity queries are defined using native SQL with
- * parameterized inputs (preventing spatial SQL injection).
  */
 @Repository
-public interface PlaceRepository extends JpaRepository<Place, UUID> {
+public interface PlaceRepository extends JpaRepository<Place, UUID>, JpaSpecificationExecutor<Place> {
 
-    /**
-     * Finds all active places within a given radius from a geographic coordinate.
-     *
-     * <p>Uses PostGIS {@code ST_DWithin} with the {@code ::geography} cast to
-     * calculate accurate spherical distances in meters (not degrees), leveraging
-     * the {@code idx_places_geom} GIST spatial index for sub-50ms execution.
-     *
-     * <p>Results are ordered by distance ascending (nearest first).
-     *
-     * @param longitude the center longitude (WGS84, X axis)
-     * @param latitude  the center latitude (WGS84, Y axis)
-     * @param radiusMeters the search radius in meters
-     * @param pageable  pagination and sorting parameters
-     * @return a paginated list of places within the radius, ordered nearest-first
-     */
     @Query(value = """
         SELECT p.*
         FROM places p
@@ -66,21 +50,105 @@ public interface PlaceRepository extends JpaRepository<Place, UUID> {
         Pageable pageable
     );
 
-    /**
-     * Finds all active places filtered by venue category with pagination.
-     *
-     * @param category the venue category (e.g., "HOSPITAL", "COLLEGE")
-     * @param pageable pagination parameters
-     * @return paginated places matching the category
-     */
-    Page<Place> findByIsActiveTrueAndCategoryIgnoreCase(String category, Pageable pageable);
+    @Query(value = """
+        SELECT p.*
+        FROM places p
+        WHERE p.is_active = true
+          AND ST_DWithin(
+                p.geom::geography,
+                ST_SetSRID(ST_MakePoint(:lng, :lat), 4326)::geography,
+                :radiusMeters
+              )
+          AND (:category IS NULL OR UPPER(p.category) = UPPER(:category))
+        ORDER BY ST_Distance(
+                p.geom::geography,
+                ST_SetSRID(ST_MakePoint(:lng, :lat), 4326)::geography
+              ) ASC
+        """,
+        countQuery = """
+        SELECT COUNT(*) FROM places p
+        WHERE p.is_active = true
+          AND ST_DWithin(
+                p.geom::geography,
+                ST_SetSRID(ST_MakePoint(:lng, :lat), 4326)::geography,
+                :radiusMeters
+              )
+          AND (:category IS NULL OR UPPER(p.category) = UPPER(:category))
+        """,
+        nativeQuery = true)
+    Page<Place> findNearbyWithCategory(
+        @Param("lng") double longitude,
+        @Param("lat") double latitude,
+        @Param("radiusMeters") double radiusMeters,
+        @Param("category") String category,
+        Pageable pageable
+    );
 
-    /**
-     * Finds all active places with pagination (no category filter).
-     *
-     * @param pageable pagination parameters
-     * @return paginated active places
-     */
-    Page<Place> findByIsActiveTrue(Pageable pageable);
+    @Query(value = """
+        SELECT p.*
+        FROM places p
+        WHERE p.is_active = true
+          AND p.geom && ST_MakeEnvelope(:west, :south, :east, :north, 4326)
+          AND (:category IS NULL OR UPPER(p.category) = UPPER(:category))
+        ORDER BY p.name ASC
+        """,
+        countQuery = """
+        SELECT COUNT(*) FROM places p
+        WHERE p.is_active = true
+          AND p.geom && ST_MakeEnvelope(:west, :south, :east, :north, 4326)
+          AND (:category IS NULL OR UPPER(p.category) = UPPER(:category))
+        """,
+        nativeQuery = true)
+    Page<Place> findInViewport(
+        @Param("west") double west,
+        @Param("south") double south,
+        @Param("east") double east,
+        @Param("north") double north,
+        @Param("category") String category,
+        Pageable pageable
+    );
+
+    Page<Place> findByIsActive(Boolean isActive, Pageable pageable);
+
+    List<Place> findAllByIsActiveTrue();
+
+    Optional<Place> findByExternalSourceId(String externalSourceId);
+
+    boolean existsByExternalSourceId(String externalSourceId);
+
+    long countByIsActiveTrue();
+
+    @Query("SELECT p.category, COUNT(p) FROM Place p GROUP BY p.category")
+    List<Object[]> countGroupByCategory();
+
+    @Query("SELECT p.state, COUNT(p) FROM Place p WHERE p.state IS NOT NULL GROUP BY p.state")
+    List<Object[]> countGroupByState();
+
+    @Query("SELECT p FROM Place p WHERE " +
+           "(:search IS NULL OR LOWER(p.name) LIKE LOWER(CONCAT('%', :search, '%')) OR LOWER(p.address) LIKE LOWER(CONCAT('%', :search, '%'))) AND " +
+           "(:category IS NULL OR UPPER(p.category) = UPPER(:category)) AND " +
+           "(:city IS NULL OR LOWER(p.city) LIKE LOWER(CONCAT('%', :city, '%'))) AND " +
+           "(:state IS NULL OR LOWER(p.state) LIKE LOWER(CONCAT('%', :state, '%'))) AND " +
+           "(:isActive IS NULL OR p.isActive = :isActive) " +
+           "ORDER BY p.createdAt DESC")
+    Page<Place> searchAdminPlaces(
+            @Param("search") String search,
+            @Param("category") String category,
+            @Param("city") String city,
+            @Param("state") String state,
+            @Param("isActive") Boolean isActive,
+            Pageable pageable
+    );
+
+    @Query("SELECT p FROM Place p WHERE p.id <> :placeId AND " +
+           "(LOWER(p.name) LIKE LOWER(CONCAT('%', :namePrefix, '%')) OR " +
+           "(p.city = :city AND p.category = :category)) " +
+           "ORDER BY p.name ASC")
+    List<Place> findDuplicateCandidates(
+            @Param("placeId") UUID placeId,
+            @Param("namePrefix") String namePrefix,
+            @Param("city") String city,
+            @Param("category") String category,
+            Pageable pageable
+    );
 }
-

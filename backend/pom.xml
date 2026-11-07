@@ -159,6 +159,51 @@
       <scope>runtime</scope>
     </dependency>
 
+    <!-- ================================================================ -->
+    <!-- OBJECT STORAGE                                                    -->
+    <!-- ================================================================ -->
+
+    <!-- MinIO Java SDK: S3-compatible object storage client for profile
+         photo and report-evidence uploads. Communicates with MinIO locally
+         and can point to any S3-compatible service (AWS, GCS, R2) in prod. -->
+    <dependency>
+      <groupId>io.minio</groupId>
+      <artifactId>minio</artifactId>
+      <version>8.5.12</version>
+    </dependency>
+
+    <!-- OkHttp: Required by MinIO SDK at runtime -->
+    <dependency>
+      <groupId>com.squareup.okhttp3</groupId>
+      <artifactId>okhttp</artifactId>
+      <version>4.12.0</version>
+    </dependency>
+
+    <!-- ================================================================ -->
+    <!-- IMAGE PROCESSING / SECURITY                                       -->
+    <!-- ================================================================ -->
+
+    <!-- Apache Tika Core: Content-type detection from raw bytes, not
+         file extension or browser-declared MIME type. Prevents disguised
+         non-image uploads. Using core only (no parsers) to stay lightweight. -->
+    <dependency>
+      <groupId>org.apache.tika</groupId>
+      <artifactId>tika-core</artifactId>
+      <version>2.9.2</version>
+    </dependency>
+
+    <!-- Thumbnailator: Pure-Java image re-encoding, resizing, and EXIF
+         stripping. Removes embedded GPS coordinates and other metadata
+         from uploaded photographs before they are stored. -->
+    <dependency>
+      <groupId>net.coobird</groupId>
+      <artifactId>thumbnailator</artifactId>
+      <version>0.4.20</version>
+    </dependency>
+
+    <!-- Spring Multipart: Already available through spring-boot-starter-web,
+         listed here for documentation clarity. No additional artifact needed. -->
+
   </dependencies>
 
   <build>
@@ -183,6 +228,15 @@
           <compilerArgs>
             <arg>-Xlint:-restricted</arg>
           </compilerArgs>
+        </configuration>
+      </plugin>
+
+      <!-- Maven Surefire Plugin: run tests with bytebuddy.experimental for JDK 26 -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <argLine>-Dnet.bytebuddy.experimental=true</argLine>
         </configuration>
       </plugin>
 

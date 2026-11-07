@@ -37,6 +37,9 @@ public class Place {
     @Column(name = "name", nullable = false)
     private String name;
 
+    @Column(name = "description", columnDefinition = "TEXT")
+    private String description;
+
     @Column(name = "category", nullable = false)
     private String category;
 
@@ -45,6 +48,12 @@ public class Place {
 
     @Column(name = "city")
     private String city;
+
+    @Column(name = "state")
+    private String state;
+
+    @Column(name = "postal_code")
+    private String postalCode;
 
     @Column(name = "country", nullable = false)
     @Builder.Default
@@ -73,6 +82,19 @@ public class Place {
     @Builder.Default
     private Boolean isActive = true;
 
+    @Column(name = "source_name", nullable = false)
+    @Builder.Default
+    private String sourceName = "PLATFORM_SEED";
+
+    @Column(name = "external_source_id")
+    private String externalSourceId;
+
+    @Column(name = "source_updated_at")
+    private OffsetDateTime sourceUpdatedAt;
+
+    @Column(name = "last_imported_at")
+    private OffsetDateTime lastImportedAt;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private OffsetDateTime createdAt;
@@ -88,5 +110,13 @@ public class Place {
     @OneToMany(mappedBy = "place", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @Builder.Default
     private List<AccessibilityFeature> features = new ArrayList<>();
+
+    public double getLatitude() {
+        return geom != null ? geom.getY() : 0.0;
+    }
+
+    public double getLongitude() {
+        return geom != null ? geom.getX() : 0.0;
+    }
 }
 

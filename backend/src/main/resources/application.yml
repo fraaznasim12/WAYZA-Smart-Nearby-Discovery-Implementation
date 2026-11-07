@@ -49,6 +49,17 @@ spring:
     baseline-on-migrate: true
     validate-on-migrate: true
 
+  # ---------------------------------------------------------------------------
+  # Multipart Upload — allow up to 15 MB per file (covers report evidence 10 MB
+  # plus encoding overhead; avatar limit is enforced in service layer at 5 MB)
+  # ---------------------------------------------------------------------------
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 15MB
+      max-request-size: 50MB
+      file-size-threshold: 2MB
+
 # ---------------------------------------------------------------------------
 # Server Configuration
 # ---------------------------------------------------------------------------
@@ -76,6 +87,51 @@ accessmap:
   # Staleness threshold: Verifications older than this many days are flagged as UNVERIFIED_STALE
   verification:
     staleness-threshold-days: 180
+
+  # ---------------------------------------------------------------------------
+  # OpenStreetMap / Overpass API Integration
+  # ---------------------------------------------------------------------------
+  osm:
+    # Overpass API endpoint. Can be replaced with a self-hosted or mirror instance.
+    overpass-endpoint: ${OVERPASS_ENDPOINT:https://overpass-api.de/api/interpreter}
+    # Set to false to disable all OSM provider calls (useful for CI or offline environments)
+    enabled: ${OSM_ENABLED:true}
+    timeout-seconds: ${OSM_TIMEOUT_SECONDS:15}
+    rate-limit-ms: ${OSM_RATE_LIMIT_MS:1000}
+    cache-ttl-minutes: ${OSM_CACHE_TTL_MINUTES:10}
+    max-retries: ${OSM_MAX_RETRIES:2}
+
+  # ---------------------------------------------------------------------------
+  # Object Storage — MinIO (S3-compatible) or Local Storage
+  # Set STORAGE_* environment variables to point to AWS S3 / GCS / R2 in production.
+  # ---------------------------------------------------------------------------
+  storage:
+    provider: ${STORAGE_PROVIDER:auto}  # auto, local, s3, or minio
+    local-dir: ${STORAGE_LOCAL_DIR:./storage/media}
+    endpoint: ${STORAGE_ENDPOINT:http://localhost:9000}
+    access-key: ${STORAGE_ACCESS_KEY:accessmap_minio}
+    secret-key: ${STORAGE_SECRET_KEY:accessmap_minio_secret}
+    bucket: ${STORAGE_BUCKET:accessmap-media}
+    region: ${STORAGE_REGION:us-east-1}
+    presigned-url-expiry-minutes: ${STORAGE_PRESIGNED_URL_EXPIRY_MINUTES:60}
+    avatar:
+      max-size-bytes: ${AVATAR_MAX_SIZE_BYTES:5242880}      # 5 MB
+    report-evidence:
+      max-size-bytes: ${REPORT_EVIDENCE_MAX_SIZE_BYTES:10485760}  # 10 MB
+
+  # ---------------------------------------------------------------------------
+  # AI Provider & Assistant Configuration (Phase 14)
+  # ---------------------------------------------------------------------------
+  ai:
+    enabled: ${AI_ENABLED:true}
+    provider: ${AI_PROVIDER:mock} # 'mock' or 'openai-compatible'
+    base-url: ${AI_BASE_URL:https://api.openai.com/v1}
+    api-key: ${AI_API_KEY:}
+    model: ${AI_MODEL:gpt-4o-mini}
+    timeout-seconds: ${AI_TIMEOUT_SECONDS:15}
+    max-input-chars: ${AI_MAX_INPUT_CHARS:1000}
+    max-output-tokens: ${AI_MAX_OUTPUT_TOKENS:600}
+    rate-limit-per-minute: ${AI_RATE_LIMIT_PER_MINUTE:20}
 
 # ---------------------------------------------------------------------------
 # Actuator — Health Check Endpoint Only
@@ -123,5 +179,10 @@ spring:
         globally_quoted_identifiers: false
   flyway:
     enabled: false
+
+accessmap:
+  storage:
+    provider: local
+    local-dir: ./storage/media
 
 

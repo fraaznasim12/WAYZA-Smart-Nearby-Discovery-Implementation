@@ -10,6 +10,7 @@ import com.accessmap.entity.UserRole;
 import com.accessmap.exception.BadRequestException;
 import com.accessmap.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -30,12 +31,14 @@ import java.util.UUID;
  */
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AuthService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
+    private final AvatarService avatarService;
 
     /**
      * Registers a new user account with {@link UserRole#ROLE_USER}.
@@ -88,17 +91,31 @@ public class AuthService {
     /**
      * Returns the authenticated user's profile by their UUID.
      * Used by GET /api/v1/auth/me after the JWT filter sets the SecurityContext.
+     * Includes a fresh pre-signed avatar URL when the user has an avatar.
      */
     @Transactional(readOnly = true)
     public UserProfileResponse getProfile(UUID userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new BadRequestException("User not found"));
+
+        // Generate a fresh pre-signed avatar URL (null if no avatar)
+        String avatarUrl = null;
+        if (user.getAvatarObjectKey() != null) {
+            try {
+                var avatarResponse = avatarService.getAvatar(user);
+                avatarUrl = avatarResponse != null ? avatarResponse.avatarUrl() : null;
+            } catch (Exception e) {
+                log.warn("Failed to generate avatar URL for user {}: {}", userId, e.getMessage());
+            }
+        }
+
         return new UserProfileResponse(
                 user.getId(),
                 user.getEmail(),
                 user.getFullName(),
                 user.getRole(),
-                user.getCreatedAt()
+                user.getCreatedAt(),
+                avatarUrl
         );
     }
 }

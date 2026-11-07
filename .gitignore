@@ -2,6 +2,12 @@
 .env
 .env.*
 !.env.example
+!.env.production.example
+
+# Local Media Storage
+storage/
+backend/storage/
+*.tsbuildinfo
 
 # Frontend (Node / Vite / React)
 frontend/node_modules/

@@ -11,6 +11,10 @@ import java.util.UUID;
  *
  * <p>Contains the authenticated user's profile information.
  * Password hashes and internal fields are intentionally excluded.
+ *
+ * <p>{@code avatarUrl} is a short-lived pre-signed URL to retrieve the user's
+ * avatar from object storage. It is {@code null} when no avatar has been uploaded.
+ * Clients should refresh this URL periodically (default expiry: 60 minutes).
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record UserProfileResponse(
@@ -18,6 +22,11 @@ public record UserProfileResponse(
         String email,
         String fullName,
         UserRole role,
-        OffsetDateTime memberSince
-) {}
+        OffsetDateTime memberSince,
 
+        /**
+         * Pre-signed URL for the user's avatar image, or {@code null} if no avatar exists.
+         * Expires after the configured presigned URL duration (default: 60 minutes).
+         */
+        String avatarUrl
+) {}

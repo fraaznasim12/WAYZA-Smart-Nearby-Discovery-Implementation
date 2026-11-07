@@ -24,16 +24,16 @@ export const AboutPage: React.FC = () => {
   ];
 
   return (
-    <PageLayout>
+    <PageLayout className="bg-[#F7F9FC]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
         
         {/* Page Hero */}
         <div className="max-w-3xl mb-16">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-teal-50 border border-teal-200 text-teal-800 text-xs font-semibold mb-4">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#E8F5F1] border border-[#0F766E]/20 text-[#0F766E] text-xs font-semibold mb-4">
             <Compass className="w-3.5 h-3.5" />
             <span>Mission &amp; Architecture</span>
           </div>
-          <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-slate-900 leading-tight">
+          <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-[#172B3A] leading-tight font-display">
             Building Physical Mobility Intelligence for Everyone.
           </h1>
           <p className="mt-5 text-lg text-slate-600 leading-relaxed">

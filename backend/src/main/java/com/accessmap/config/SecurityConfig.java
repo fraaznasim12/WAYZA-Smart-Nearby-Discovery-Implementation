@@ -116,12 +116,36 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 // Public authentication endpoints
                 .requestMatchers("/api/v1/auth/register", "/api/v1/auth/login").permitAll()
-                // Public read-only place discovery
+                // Public read-only place discovery and accessibility profiles/catalogue
                 .requestMatchers(HttpMethod.GET, "/api/v1/places/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/v1/accessibility-features").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/v1/accessibility/observations/me").authenticated()
+                .requestMatchers(HttpMethod.GET, "/api/v1/accessibility/**").permitAll()
+                // Public media delivery (avatars, evidence images)
+                .requestMatchers(HttpMethod.GET, "/api/v1/media/**").permitAll()
+                .requestMatchers(HttpMethod.HEAD, "/api/v1/media/**").permitAll()
                 // Health and monitoring endpoints (custom + Spring Actuator)
                 .requestMatchers("/api/v1/health").permitAll()
                 .requestMatchers("/actuator/**").permitAll()
+                // AI Assistant endpoints (publicly accessible with IP/user rate limiting)
+                .requestMatchers("/api/v1/ai/assistant/**").permitAll()
+                // Observation submissions and evidence uploads (any authenticated user)
+                .requestMatchers(HttpMethod.POST, "/api/v1/places/*/observations").hasAnyRole("USER", "CONTRIBUTOR", "BUSINESS", "BUSINESS_OWNER", "ADMIN")
+                .requestMatchers(HttpMethod.POST, "/api/v1/places/*/accessibility/observations").hasAnyRole("USER", "CONTRIBUTOR", "BUSINESS", "BUSINESS_OWNER", "ADMIN")
+                .requestMatchers(HttpMethod.POST, "/api/v1/places/*/accessibility/evidence/upload").hasAnyRole("USER", "CONTRIBUTOR", "BUSINESS", "BUSINESS_OWNER", "ADMIN")
+                // Community accessibility reports
+                .requestMatchers(HttpMethod.POST, "/api/v1/reports/**").hasAnyRole("USER", "CONTRIBUTOR", "BUSINESS", "BUSINESS_OWNER", "ADMIN")
+                .requestMatchers("/api/v1/reports/**").authenticated()
+                // Community dispute submissions
+                .requestMatchers(HttpMethod.POST, "/api/v1/disputes/**").hasAnyRole("USER", "CONTRIBUTOR", "BUSINESS", "BUSINESS_OWNER", "ADMIN")
+                .requestMatchers("/api/v1/disputes/**").authenticated()
+                // Avatar management — authenticated users only (own avatar only, enforced in service)
+                .requestMatchers("/api/v1/users/me/avatar").authenticated()
+                // Notification & real-time SSE stream endpoints
+                .requestMatchers("/api/v1/notifications/**").authenticated()
                 // Admin-only management endpoints
+                .requestMatchers(HttpMethod.POST, "/api/v1/places").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.POST, "/api/v1/places/").hasRole("ADMIN")
                 .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                 // Business owner endpoints
                 .requestMatchers("/api/v1/business/**").hasAnyRole("BUSINESS", "BUSINESS_OWNER", "ADMIN")
@@ -151,7 +175,8 @@ public class SecurityConfig {
                 "Accept",
                 "Origin",
                 "Access-Control-Request-Method",
-                "Access-Control-Request-Headers"
+                "Access-Control-Request-Headers",
+                "Cache-Control"
         ));
         configuration.setExposedHeaders(List.of("Authorization"));
         configuration.setAllowCredentials(true);
