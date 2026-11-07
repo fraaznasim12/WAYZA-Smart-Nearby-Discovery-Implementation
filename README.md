@@ -1,4 +1,4 @@
-# 🗺️ AccessMap: Intelligent Physical Accessibility Discovery & Verification Platform
+# 🗺️ WAYZA / AccessMap: Intelligent Physical Accessibility Discovery & Verification Platform
 
 [![Accessibility: WCAG 2.1 AA](https://img.shields.io/badge/Accessibility-WCAG%202.1%20AA-0D9488?style=for-the-badge)](docs/PROJECT_RULES.md)
 [![Frontend: React + TypeScript + Vite](https://img.shields.io/badge/Frontend-React%20%2B%20TypeScript%20%2B%20Vite-61DAFB?style=for-the-badge&logo=react)](frontend/)
@@ -8,7 +8,7 @@
 [![Backend: Java 21 + Spring Boot 3](https://img.shields.io/badge/Backend-Java%2021%20%2B%20Spring%20Boot%203-6DB33F?style=for-the-badge&logo=springboot)](backend/)
 [![Database: PostgreSQL + PostGIS](https://img.shields.io/badge/Database-PostgreSQL%2016%20%2B%20PostGIS-336791?style=for-the-badge&logo=postgresql)](docker-compose.yml)
 
-**AccessMap** is an enterprise-grade, full-stack software engineering platform designed to eliminate accessibility uncertainty in the physical world. It empowers individuals with mobility impairments, wheelchair users, elderly citizens, and parents with strollers to discover, inspect, and verify real-world accessibility infrastructure (such as step-free entrances, ramps, elevators, and accessible washrooms) across hospitals, colleges, transit hubs, restaurants, shopping malls, and civic centers.
+**AccessMap** (WAYZA Smart Nearby Discovery Implementation) is an enterprise-grade, location-aware accessibility discovery platform designed to help people find places, explore accessibility information, and share community insights through interactive maps, real-time device location, and multilingual support. It eliminates accessibility uncertainty in the physical world, empowering individuals with mobility impairments, wheelchair users, elderly citizens, and parents with strollers to discover, inspect, and verify real-world accessibility infrastructure (such as step-free entrances, ramps, elevators, and accessible washrooms) across hospitals, colleges, transit hubs, restaurants, shopping malls, and civic centers.
 
 Unlike generic directories that treat accessibility as a trivial binary checkbox (`true`/`false`), **AccessMap** enforces a rigorous **Four-State Verification Model**, pairs interactive spatial mapping with purposeful 3D architectural spatial cutaways, and provides an active community auditing and dispute resolution engine.
 
@@ -106,7 +106,8 @@ AccessMap/
 
 ---
 
-## 🚀 Development Status
+## 🚀 Development & Deployment Status
 
-* **Current Stage:** Phase 16 — Production Deployment & Cloud Hosting Preparation completed.
+* **Current Stage:** Phase 17 — Live Deployment & Portfolio Launch.
 * **Hosting Targets:** Vercel (Frontend), Render Docker (Backend), Supabase (PostgreSQL + PostGIS), Cloudflare R2 (Media Storage).
+* **Repository:** [WAYZA-Smart-Nearby-Discovery-Implementation](https://github.com/fraaznasim12/WAYZA-Smart-Nearby-Discovery-Implementation)
