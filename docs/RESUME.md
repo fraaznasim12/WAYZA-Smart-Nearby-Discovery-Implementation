@@ -81,3 +81,4 @@ Physical accessibility is frequently misrepresented by binary booleans (`is_acce
 
 **Q: How does the application maintain WCAG 2.1 AA accessibility?**  
 > *"Accessibility is built into the architecture: status is never conveyed by color alone—all status badges combine distinct high-contrast icons, ARIA attributes, and explicit text labels. Our 3D Three.js visualizations inspect the user's OS `prefers-reduced-motion` settings and automatically fall back to an accessible, high-contrast 2D SVG architectural plan."*
+

@@ -313,3 +313,4 @@ All admin routes strictly require `ROLE_ADMIN`.
 | :--- | :--- | :--- |
 | `GET` | `/actuator/health` | Spring Boot Actuator liveness and readiness probe |
 | `GET` | `/actuator/info` | Application metadata and build version |
+

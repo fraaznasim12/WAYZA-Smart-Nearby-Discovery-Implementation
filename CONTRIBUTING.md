@@ -118,3 +118,4 @@ The AccessMap repository is currently evaluating its formal open-source license.
 - **GNU AGPLv3:** Strong copyleft license ensuring community accessibility platforms remain open when served over networks.
 
 Until a formal `LICENSE` file is committed by the project owner, all rights are reserved by the original author (**Mohammad Fraaz Nasim**).
+

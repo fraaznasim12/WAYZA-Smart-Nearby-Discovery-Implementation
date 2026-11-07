@@ -55,3 +55,4 @@ To protect users and platform integrity during photo uploads (avatars and report
 - **Zero Hardcoded Credentials:** Application configuration files (`application-prod.yml`) rely entirely on environment variables (`DB_URL`, `DB_PASSWORD`, `JWT_SECRET`, `STORAGE_*`).
 - **Container Isolation:** The production backend Docker container executes under a dedicated, unprivileged system user (`appuser:10001`) with read-only root filesystems where applicable.
 - **Network Boundaries:** Database connections enforce SSL (`sslmode=require`), and CORS policies restrict browser origins to verified frontend domains.
+

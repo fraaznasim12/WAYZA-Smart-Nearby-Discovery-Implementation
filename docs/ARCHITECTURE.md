@@ -1,4 +1,4 @@
-﻿# AccessMap — System Architecture Specification
+# AccessMap — System Architecture Specification
 
 ## 1. System Overview
 
