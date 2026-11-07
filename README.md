@@ -1,113 +1,261 @@
-# 🗺️ WAYZA / AccessMap: Intelligent Physical Accessibility Discovery & Verification Platform
+# 🗺️ AccessMap: Intelligent Physical Accessibility Discovery & Verification Platform
 
-[![Accessibility: WCAG 2.1 AA](https://img.shields.io/badge/Accessibility-WCAG%202.1%20AA-0D9488?style=for-the-badge)](docs/PROJECT_RULES.md)
-[![Frontend: React + TypeScript + Vite](https://img.shields.io/badge/Frontend-React%20%2B%20TypeScript%20%2B%20Vite-61DAFB?style=for-the-badge&logo=react)](frontend/)
-[![Styling: Tailwind CSS](https://img.shields.io/badge/Styling-Tailwind%20CSS-38B2AC?style=for-the-badge&logo=tailwind-css)](frontend/)
-[![3D: Three.js + R3F](https://img.shields.io/badge/3D-Three.js%20%2F%20R3F-000000?style=for-the-badge&logo=three.js)](frontend/)
-[![Maps: MapLibre GL](https://img.shields.io/badge/Maps-MapLibre%20GL%20JS-396B99?style=for-the-badge&logo=maplibre)](frontend/)
-[![Backend: Java 21 + Spring Boot 3](https://img.shields.io/badge/Backend-Java%2021%20%2B%20Spring%20Boot%203-6DB33F?style=for-the-badge&logo=springboot)](backend/)
-[![Database: PostgreSQL + PostGIS](https://img.shields.io/badge/Database-PostgreSQL%2016%20%2B%20PostGIS-336791?style=for-the-badge&logo=postgresql)](docker-compose.yml)
+> **Eliminating physical accessibility uncertainty through verifiable geospatial intelligence, community auditing, and 3D architectural spatial cutaways.**
 
-**AccessMap** (WAYZA Smart Nearby Discovery Implementation) is an enterprise-grade, location-aware accessibility discovery platform designed to help people find places, explore accessibility information, and share community insights through interactive maps, real-time device location, and multilingual support. It eliminates accessibility uncertainty in the physical world, empowering individuals with mobility impairments, wheelchair users, elderly citizens, and parents with strollers to discover, inspect, and verify real-world accessibility infrastructure (such as step-free entrances, ramps, elevators, and accessible washrooms) across hospitals, colleges, transit hubs, restaurants, shopping malls, and civic centers.
-
-Unlike generic directories that treat accessibility as a trivial binary checkbox (`true`/`false`), **AccessMap** enforces a rigorous **Four-State Verification Model**, pairs interactive spatial mapping with purposeful 3D architectural spatial cutaways, and provides an active community auditing and dispute resolution engine.
+[![GitHub CI](https://github.com/fraaznasim12/WAYZA-Smart-Nearby-Discovery-Implementation/actions/workflows/ci.yml/badge.svg)](https://github.com/fraaznasim12/WAYZA-Smart-Nearby-Discovery-Implementation/actions/workflows/ci.yml)
+[![Accessibility: WCAG 2.1 AA](https://img.shields.io/badge/Accessibility-WCAG%202.1%20AA-0D9488?style=flat-square)](docs/PROJECT_RULES.md)
+[![Frontend: React + Vite + TS](https://img.shields.io/badge/Frontend-React%2018%20%2B%20TypeScript-61DAFB?style=flat-square&logo=react)](frontend/)
+[![Backend: Java 21 + Spring Boot 3](https://img.shields.io/badge/Backend-Java%2021%20%2B%20Spring%20Boot%203-6DB33F?style=flat-square&logo=springboot)](backend/)
+[![Database: PostgreSQL + PostGIS](https://img.shields.io/badge/Database-PostgreSQL%2016%20%2B%20PostGIS%203.4-336791?style=flat-square&logo=postgresql)](docs/DATABASE.md)
+[![Storage: Cloudflare R2 / S3](https://img.shields.io/badge/Storage-Cloudflare%20R2%20%2F%20S3-F38020?style=flat-square&logo=cloudflare)](backend/)
 
 ---
 
-## 🌟 Core Pillars & Domain Innovations
+## 1. Project Overview
 
-### 1. The Four-State Verification Model
-Physical accessibility is nuanced and dynamic. AccessMap treats all architectural features according to four distinct, unambiguous states:
+**AccessMap** is an enterprise-grade, full-stack geospatial platform engineered to map and verify physical accessibility infrastructure across real-world venues, including hospitals, universities, transit hubs, restaurants, and civic centers.
 
-| Feature State | Indicator Badge | Definition & System Rule |
+Unlike standard commercial directories that treat accessibility as an ambiguous binary boolean (`wheelchair_accessible: true/false`), AccessMap implements a domain-driven **Four-State Verification Model**, pairs interactive vector mapping with **Three.js 3D architectural spatial cutaways**, and provides an immutable community audit trail with tamper-resistant photo evidence.
+
+---
+
+## 2. Real-World Problem Statement
+
+For over 1 billion people worldwide living with mobility impairments—including wheelchair users, elderly citizens, injured individuals, and parents with strollers—navigating cities involves constant physical friction:
+- **Binary Fallacies:** A venue labeled "accessible" might have a ramp at the entrance but no accessible restroom or an out-of-order elevator.
+- **Stale & Unverified Data:** Physical access changes dynamically due to construction, broken lifts, or blocked pathways.
+- **Visual Ambiguity:** Photos of venues rarely focus on entry thresholds, door widths, or slope inclines, forcing individuals to risk travel without certainty.
+
+---
+
+## 3. Our Solution
+
+AccessMap replaces uncertainty with verifiable truth through:
+1. **Four-State Verification:** Every architectural feature is audited as `AVAILABLE`, `NOT_AVAILABLE`, `UNKNOWN`, or `NOT_VERIFIED`.
+2. **Sub-50ms Geospatial Discovery:** PostGIS spatial queries (`ST_DWithin`) with GiST indexes calculate true geodetic spherical distances.
+3. **One-Touch Phone Location Detection:** Automatically detects device GPS coordinates over HTTPS, re-centering maps and loading nearby accessible places instantly.
+4. **Purposeful 3D Micro-Visualizations:** 3D isometric cutaways illustrate complex multi-floor accessible paths, pairing with an accessible 2D SVG fallback.
+5. **Community Audits & Dispute Queues:** Peer verification and moderation workflows allow facility owners and local auditors to keep data fresh.
+
+---
+
+## 4. Key Features
+
+- **Interactive Vector Spatial Map:** Built with MapLibre GL JS, featuring custom accessible markers, category filters, and live viewport sync.
+- **Real-Time Phone Geolocation:** Native browser Geolocation API integration with permission recovery, accuracy circles, and fallback search.
+- **Custom Mobility Profiles:** Users configure personalized accessibility requirements (e.g. wheelchair, visual, stroller) that automatically filter venues.
+- **3D Spatial Cutaways:** Three.js / React Three Fiber interactive models visualizing multi-floor ingress, ramp gradients, and elevator positions.
+- **Community Field Audits:** Registered users can submit accessibility updates with multi-photo evidence and location notes.
+- **Secure Image Sanitization:** Automatic stripping of EXIF GPS metadata and image transcoding to safeguard user privacy.
+- **Real-Time Server-Sent Events (SSE):** Instant notifications when reports are peer-verified or community disputes are resolved.
+- **Facility Claim & Business Dashboard:** Business owners can claim venue listings, post official updates, and respond to community feedback.
+- **Comprehensive Admin Suite:** Moderation queues, user role management, system metrics, and immutable audit logs.
+
+---
+
+## 5. Application Screenshots
+
+### Desktop Experience
+| Landing & 3D Hero | Interactive Map & Nearby Discovery |
+| :---: | :---: |
+| ![Home Page](docs/assets/home-page.png) | ![Explore Map](docs/assets/explore-map.png) |
+
+| User Dashboard & Mobility Profile | Business Facility Portal |
+| :---: | :---: |
+| ![User Dashboard](docs/assets/dashboard.png) | ![Business Portal](docs/assets/business-portal.png) |
+
+### Mobile & Administrative Workflows
+| Mobile Phone Location Experience | Admin Dashboard & Moderation |
+| :---: | :---: |
+| ![Mobile Experience](docs/assets/mobile-explore.png) | ![Admin Dashboard](docs/assets/admin-dashboard.png) |
+
+---
+
+## 6. Technology Stack
+
+| Layer | Technology | Details & Purpose |
 | :--- | :--- | :--- |
-| **`AVAILABLE`** | `[Verified: Available]` | In-person verified present, operational, and unobstructed within the last 180 days. |
-| **`NOT_AVAILABLE`** | `[Confirmed: Not Available]` | Explicitly audited as absent or non-functional (e.g., steep stairs only, out-of-order lift). |
-| **`UNKNOWN`** | `[Status: Unknown]` | No verified audit data recorded yet. **Strict Rule: Unknown is NEVER treated as Not Available.** Prompts community submission. |
-| **`NOT_VERIFIED`** | `[Status: Not Verified]` | A report exists but has not completed peer verification or exceeds the 180-day freshness SLA (`UNVERIFIED_STALE`). |
-
-> **Accessibility Standard:** Status is never communicated by color alone. Every indicator pairs high-contrast text, unique semantic icon glyphs, and ARIA attributes for screen readers.
-
-### 2. Purposeful 3D Micro-Visualizations with Resilient 2D Fallback
-- **3D Spatial Cutaway (Three.js / React Three Fiber / Drei):** Visualizes multi-level accessible ingress paths, ramp inclines, and elevator cores in an interactive isometric view.
-- **Progressive Enhancement & Fallback:** If WebGL is unavailable or the user has enabled OS `prefers-reduced-motion`, the system automatically renders an accessible, high-contrast 2D architectural SVG diagram.
-
-### 3. Spatial Proximity & Accessibility Filtering
-- Powered by **PostgreSQL 16 + PostGIS**, enabling sub-50ms radius queries (`ST_DWithin`) based on latitude, longitude, and custom distance buffers.
-- Supports strict multi-feature filtering (e.g., "Must have step-free entrance AND operational elevator AND accessible restroom").
-
-### 4. Community Auditing & Dispute Moderation
-- Every report records its **source** (User, Certified Auditor, Business Owner), **submission date**, **verification status**, and **last verified timestamp**.
-- Multi-photo evidence upload with EXIF metadata extraction for tamper-resistant field auditing.
-- Dispute queue enabling community members and facility managers to flag outdated or incorrect data.
+| **Frontend Framework** | React 18 + TypeScript | Component-based client runtime with strict type safety |
+| **Build Tooling** | Vite 6 | Rapid Hot Module Replacement (HMR) and optimized rollup production bundles |
+| **Styling & UI** | Tailwind CSS v4 + Lucide React | High-contrast design tokens compliant with WCAG 2.1 AA |
+| **Mapping Engine** | MapLibre GL JS | Open-source client-side vector tile spatial rendering |
+| **3D Graphics** | Three.js + React Three Fiber + Drei | Interactive spatial architectural cutaways with 2D SVG fallback |
+| **Backend Framework** | Java 21 + Spring Boot 3.4.2 | High-throughput enterprise modular monolith REST API |
+| **Security & Auth** | Spring Security 6 + JWT | Stateless HMAC-SHA256 bearer tokens and 4-tier RBAC |
+| **Database & GIS** | PostgreSQL 16 + PostGIS 3.4 | Spatial point geometries (`Point 4326`), GiST indexes, `ST_DWithin` queries |
+| **Database Migrations**| Flyway | Versioned database migrations (V1 through V13) |
+| **Object Storage** | Cloudflare R2 / MinIO | S3-compatible zero-egress object storage for EXIF-sanitized evidence photos |
+| **Monitoring** | Spring Boot Actuator | Health, liveness, and readiness probes |
 
 ---
 
-## 🧩 Architectural Modules
+## 7. System Architecture
 
-The platform is designed as a **Modular Monolith** comprising 10 distinct functional modules:
-
-1. **User Authentication & Profiles:** Secure JWT stateless auth, role-based access control (`USER`, `CONTRIBUTOR`, `BUSINESS`, `ADMIN`).
-2. **Accessibility Preference Profiles:** Personalized mobility profiles that highlight relevant accessibility features and automatically pre-filter discovery results.
-3. **Interactive Map & Place Discovery:** Dynamic MapLibre GL JS vector map synchronized with an accessible, keyboard-navigable list/table view.
-4. **Accessibility Filters:** Granular filtering by facility category, distance radius, and multi-feature availability.
-5. **Place Details & Feature Intelligence:** Deep dive view of venue accessibility, operating hours, contact details, and feature-by-feature audits.
-6. **Community Accessibility Reports:** User-submitted audits tracking changes, ramp obstacles, or broken elevators.
-7. **Photo Evidence & Verification:** Visual proof submission with secure image validation.
-8. **Report Disputes & Moderation:** Community flagging system with administrative review queues.
-9. **Business & Facility Dashboard:** Facility managers can claim locations, respond to audits, and post official facility updates.
-10. **Admin Dashboard:** System metrics, user role management, dispute resolution, and audit logs.
-
----
-
-## 🛠️ Technology Stack
-
-| Layer | Technology | Purpose |
-| :--- | :--- | :--- |
-| **Frontend Framework** | React 18 + TypeScript + Vite | Lightning-fast modern client runtime with strict static typing |
-| **Styling & UI** | Tailwind CSS v4 + Lucide React | High-contrast design system, utility-first responsive layout |
-| **Animation & 3D** | Framer Motion + Three.js + R3F + Drei | Smooth accessible transitions and progressive 3D spatial cutaways |
-| **Mapping Engine** | MapLibre GL JS | Open-source vector tile spatial maps |
-| **Networking & Routing** | Axios + React Router DOM v7 | Typed REST HTTP client and client-side routing |
-| **Backend Framework** | Java 21 + Spring Boot 3 | Enterprise-grade modular monolith REST API |
-| **Security** | Spring Security + JWT | Stateless role-based authentication and endpoint authorization |
-| **Persistence** | Spring Data JPA + Hibernate Spatial | Object-relational mapping with native spatial geometry support |
-| **Database** | PostgreSQL 16 + PostGIS 3.4 (Supabase) | High-performance spatial indexing (`GIST`) and geospatial queries |
-| **Object Storage** | Cloudflare R2 (S3-compatible) | EXIF-sanitized storage for avatars and report evidence photos |
-| **Cloud Hosting** | Vercel (Frontend) + Render (Backend) | Production edge CDN distribution and containerized web services |
-
----
-
-## 📁 Repository Structure
-
-```text
-AccessMap/
-├── frontend/               # React + TypeScript + Vite client application
-├── backend/                # Java 21 + Spring Boot 3 modular monolith application
-├── docs/                   # Engineering specifications and guidelines
-│   ├── PROJECT_RULES.md    # Coding standards, a11y mandates, and security rules
-│   ├── REQUIREMENTS.md     # Software Requirements Specification (SRS) & 10 modules
-│   ├── ROADMAP.md          # Phased development roadmap with testable milestones
-│   └── ARCHITECTURE.md     # System architecture, database schema & data flows
-├── docker-compose.yml      # PostGIS 16 spatial database service definition
-├── README.md               # Project overview and documentation index
-└── .gitignore              # Repository git ignore rules
+```mermaid
+flowchart TD
+    Client["Client (Browser / Mobile)"] -->|HTTPS / WSS| Vercel["Vercel Edge CDN"]
+    Vercel -->|REST API / SSE| SpringBoot["Spring Boot 3 API (Render Docker)"]
+    SpringBoot -->|Spring Security JWT| Auth["Stateless RBAC Gate"]
+    Auth --> Controllers["REST Controllers (v1)"]
+    Controllers --> Services["Domain Services (Places, Reports, AI)"]
+    Services --> Storage["MediaStorageService (EXIF Stripping)"]
+    Services --> PostGIS[("PostgreSQL 16 + PostGIS (Supabase)")]
+    Storage --> S3[("Cloudflare R2 Object Storage")]
 ```
 
----
-
-## 📖 Documentation Index
-
-* **[Production Deployment Guide](docs/DEPLOYMENT.md):** Cloud hosting architecture, Vercel, Render, Supabase, Cloudflare R2, security checklist, and step-by-step deployment instructions.
-* **[Engineering Rules & Standards](docs/PROJECT_RULES.md):** 13 mandatory principles covering code style, security, a11y, and solo development workflow.
-* **[Requirements Specification](docs/REQUIREMENTS.md):** Detailed breakdown of all 10 modules, functional requirements, and non-functional SLAs.
-* **[Implementation Roadmap](docs/ROADMAP.md):** Milestone-by-milestone implementation plan with verifiable checkpoints.
-* **[Architecture Specification](docs/ARCHITECTURE.md):** System diagrams, PostGIS database DDL, API contracts, and security boundaries.
+*For comprehensive architecture documentation, see [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).*
 
 ---
 
-## 🚀 Development & Deployment Status
+## 8. Database & Spatial Architecture
 
-* **Current Stage:** Phase 17 — Live Deployment & Portfolio Launch.
-* **Hosting Targets:** Vercel (Frontend), Render Docker (Backend), Supabase (PostgreSQL + PostGIS), Cloudflare R2 (Media Storage).
-* **Repository:** [WAYZA-Smart-Nearby-Discovery-Implementation](https://github.com/fraaznasim12/WAYZA-Smart-Nearby-Discovery-Implementation)
+Venues are indexed spatially using PostGIS `geometry(Point, 4326)`. Sub-50ms proximity queries are executed natively on the database sphere:
+
+```mermaid
+erDiagram
+    PLACES ||--o{ ACCESSIBILITY_FEATURES : "has"
+    PLACES ||--o{ ACCESSIBILITY_REPORTS : "receives"
+    USERS ||--o{ ACCESSIBILITY_REPORTS : "submits"
+    ACCESSIBILITY_REPORTS ||--o{ REPORT_PHOTOS : "contains"
+    ACCESSIBILITY_REPORTS ||--o{ REPORT_DISPUTES : "flagged by"
+
+    PLACES {
+        uuid id PK
+        varchar name
+        varchar category
+        geometry geom "Point 4326 GiST"
+    }
+    ACCESSIBILITY_FEATURES {
+        uuid id PK
+        uuid place_id FK
+        varchar feature_type
+        varchar status "AVAILABLE | NOT_AVAILABLE | UNKNOWN | NOT_VERIFIED"
+    }
+```
+
+*For complete database schema and entity details, see [docs/DATABASE.md](docs/DATABASE.md).*
+
+---
+
+## 9. How the Application Works
+
+1. **User Discovery:** A user navigates to the Explore page. Clicking **"Use My Current Location"** triggers the browser Geolocation API.
+2. **Spatial Calculation:** Coordinates are passed to `/api/v1/places/nearby`. The backend executes a PostGIS `ST_DWithin` spatial query to retrieve venues within the requested radius.
+3. **Four-State Inspection:** Each venue displays verified feature badges (step-free entrance, ramp, elevator, restroom).
+4. **Community Verification:** Users can submit fresh observations with photos. Photos are stripped of EXIF coordinates on the server before storage in Cloudflare R2.
+5. **Real-Time Notification:** When an auditor or admin verifies a report, an SSE event pushes the update to active clients instantly.
+
+---
+
+## 10. Local Installation & Setup
+
+### Prerequisites
+- **Java Development Kit (JDK):** Version 21 (Eclipse Temurin or OpenJDK)
+- **Node.js:** v18+ and npm v9+
+- **Docker:** Optional (local PostgreSQL/PostGIS)
+
+### 1. Clone the Repository
+```bash
+git clone https://github.com/fraaznasim12/WAYZA-Smart-Nearby-Discovery-Implementation.git AccessMap
+cd AccessMap
+```
+
+### 2. Backend Setup
+The backend runs out-of-the-box using the `dev` profile with spatial H2GIS support:
+```bash
+cd backend
+# Run test suite
+.\mvnw.cmd clean test
+
+# Start backend server
+.\mvnw.cmd spring-boot:run -Dspring-boot.run.profiles=dev
+```
+The API starts at `http://localhost:8080`.
+
+### 3. Frontend Setup
+```bash
+cd ../frontend
+npm install
+npm run dev
+```
+Open `http://localhost:5173` (or `http://localhost:5174`) in your browser.
+
+---
+
+## 11. Environment Variables Reference
+
+A complete template is available in [`.env.production.example`](.env.production.example):
+
+| Variable | Description | Example / Default |
+| :--- | :--- | :--- |
+| `SPRING_PROFILES_ACTIVE` | Active Spring profile | `prod` (production) or `dev` (local) |
+| `DB_URL` | PostgreSQL JDBC Connection URL | `jdbc:postgresql://<host>:5432/postgres?sslmode=require` |
+| `DB_USER` / `DB_PASSWORD` | Database credentials | Managed database credentials |
+| `JWT_SECRET` | 256-bit cryptographically secure key | Random 32+ character string |
+| `STORAGE_PROVIDER` | Object storage provider | `s3` or `local` |
+| `STORAGE_ENDPOINT` | S3 / Cloudflare R2 endpoint | `https://<account_id>.r2.cloudflarestorage.com` |
+| `STORAGE_ACCESS_KEY` / `STORAGE_SECRET_KEY` | Storage credentials | Cloudflare R2 scoped token credentials |
+| `STORAGE_BUCKET` | Storage bucket name | `accessmap-media` |
+| `CORS_ORIGINS` | Allowed frontend origins | `https://accessmap.vercel.app` |
+| `VITE_API_BASE_URL` | Frontend API base URL | `https://accessmap-api.onrender.com` |
+
+---
+
+## 12. Testing & Verification
+
+### Backend Automated Test Suite
+The backend includes 111 unit and integration tests covering authentication, PostGIS spatial queries, report submission, dispute handling, image upload flows, and admin dashboards:
+```bash
+cd backend
+.\mvnw.cmd clean verify
+```
+*Result: 111 tests passed, 0 failures, 0 errors.*
+
+### Frontend Production Build & Type Check
+```bash
+cd frontend
+npm run build
+```
+*Result: Clean compilation with 0 TypeScript errors.*
+
+---
+
+## 13. Production Deployment Architecture
+
+The application is prepared for free-tier cloud deployment:
+- **Frontend:** Vercel ([`frontend/vercel.json`](frontend/vercel.json) with SPA route fallbacks and security headers).
+- **Backend:** Render Web Service via multi-stage Alpine Dockerfile ([`backend/Dockerfile`](backend/Dockerfile) with dynamic `$PORT` binding).
+- **Database:** Supabase PostgreSQL 16 + PostGIS 3.4 (`search_path=public,extensions`).
+- **Object Storage:** Cloudflare R2 S3-compatible zero-egress media storage.
+
+*For detailed cloud provisioning steps, refer to [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).*
+
+---
+
+## 14. Security & Privacy Considerations
+
+- **Zero Location Tracking:** Physical coordinates are utilized in-memory for proximity queries and are never logged or persisted.
+- **EXIF Stripping:** Uploaded photos have all EXIF metadata (including device GPS coordinates) removed before saving.
+- **Stateless RBAC:** Role escalation is prevented by server-side validation; passwords use BCrypt hashing (`work factor = 12`).
+- **Unprivileged Containers:** Docker runs as non-root user `appuser:10001`.
+
+*For the complete security policy and vulnerability disclosure instructions, see [SECURITY.md](SECURITY.md).*
+
+---
+
+## 15. Current Limitations & Planned Roadmap
+
+| Domain | Current Implementation Status | Planned Future Enhancement |
+| :--- | :--- | :--- |
+| **Localization** | English is currently active across the UI | Multilingual translation engine (Spanish, French, German, Hindi) |
+| **Transit Ingress** | Point-based venue coordinates | Multi-entrance indoor routing and turn-by-turn guidance |
+| **Offline Support** | Online web client | PWA offline caching for low-connectivity zones |
+| **Audit Rewards** | Community verification badges | Contributor reputation scores and gamification |
+
+---
+
+## 16. Contributing & License
+
+Contributions are welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) for local setup, coding conventions, and pull request guidelines.
+
+*License:* Open-source license selection is currently under review by the repository owner (Mohammad Fraaz Nasim). See [CONTRIBUTING.md](CONTRIBUTING.md#6-project-licensing-notice).
