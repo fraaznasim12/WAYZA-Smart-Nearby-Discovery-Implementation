@@ -153,11 +153,47 @@ This document provides a comprehensive reference for the AccessMap REST API, ver
 - **Query Parameters:** `q` (string, required), `city` (string, optional)
 - **Response (`200 OK`):** List of matching places.
 
+### 2.4 Suggest a New Venue (Community Proposal)
+- **Endpoint:** `POST /api/v1/places/suggest`
+- **Auth:** Required (`ROLE_USER` or higher)
+- **Request Body:**
+  ```json
+  {
+    "name": "Community Health Center",
+    "category": "HOSPITAL",
+    "address": "Sector 14, Ring Road",
+    "city": "New Delhi",
+    "state": "Delhi",
+    "latitude": 28.6139,
+    "longitude": 77.2090
+  }
+  ```
+- **Response (`201 Created`):**
+  Returns newly proposed Place entity with `isActive: false` and `sourceName: "COMMUNITY_SUGGESTION"` awaiting admin verification.
+
 ---
 
 ## 3. Community Reports & Verification
 
-### 3.1 Submit Community Accessibility Report
+### 3.1 Submit Community Report (Direct / Global)
+- **Endpoint:** `POST /api/v1/reports`
+- **Auth:** Required (`ROLE_USER` or higher)
+- **Request Body (JSON):** Accepts `ReportCreateRequest` with `placeId`, `reportType` (`ACCESSIBILITY_ISSUE`, `ACCESSIBILITY_IMPROVEMENT`, `VISIT_REVIEW`), `category`, `title`, `description`, `observationStatus`, `impact`, `isPresent`, `observationSource`, `rating`, `whatLiked`, `whatImproved`, `whatToKnow`, `observationDate`.
+- **Response (`201 Created`):** Standard `ApiResponse<ReportResponseDto>`.
+
+### 3.2 Upload Photo to Report
+- **Endpoint:** `POST /api/v1/reports/{reportId}/photos`
+- **Auth:** Required (Author or Admin)
+- **Content-Type:** `multipart/form-data`
+- **Params:** `file` (MultipartFile, JPEG/PNG/WebP), `caption` (optional string)
+- **Response (`200 OK`):** `ApiResponse<ReportPhotoDto>`.
+
+### 3.3 List User's Reports
+- **Endpoint:** `GET /api/v1/reports/me`
+- **Auth:** Required
+- **Response (`200 OK`):** `ApiResponse<List<ReportResponseDto>>`.
+
+### 3.4 Submit Place-Scoped Accessibility Report
 - **Endpoint:** `POST /api/v1/places/{placeId}/reports`
 - **Auth:** Required (`ROLE_USER` or higher)
 - **Request Body:**

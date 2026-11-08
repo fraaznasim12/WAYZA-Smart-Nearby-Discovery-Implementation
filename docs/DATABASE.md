@@ -308,5 +308,6 @@ Schema changes are tracked version-by-version using Flyway:
 - `V12__admin_dashboard_and_platform_management.sql`: `admin_audit_logs`, `platform_settings`, and `data_import_history`.
 - `V13__notifications_and_realtime_updates.sql`: `notifications`, `notification_preferences`, and real-time SSE support.
 - `V14__community_reviews.sql`: `place_reviews` and `review_photos` tables with moderation statuses (`PENDING`, `APPROVED`, `REJECTED`), separate from certified accessibility audits.
+- `V15__extend_accessibility_reports_community_workflow.sql`: Extended `accessibility_reports` with community observation fields (`report_type`, `observation_status`, `impact`, `is_present`, `observation_source`, `rating`, `what_liked`, `what_improved`, `what_to_know`), plus `idx_reports_type`.
 
 
