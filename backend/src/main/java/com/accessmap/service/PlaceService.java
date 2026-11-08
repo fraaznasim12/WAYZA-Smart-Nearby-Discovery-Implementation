@@ -7,6 +7,7 @@ import com.accessmap.entity.AccessibilityFeature;
 import com.accessmap.entity.FeatureStatus;
 import com.accessmap.entity.FeatureType;
 import com.accessmap.entity.Place;
+import com.accessmap.entity.User;
 import com.accessmap.exception.BadRequestException;
 import com.accessmap.exception.ResourceNotFoundException;
 import com.accessmap.repository.PlaceRepository;
@@ -272,6 +273,44 @@ public class PlaceService {
                 .build();
 
         // Initialize default un-audited features in UNKNOWN state
+        for (FeatureType type : FeatureType.values()) {
+            AccessibilityFeature feature = AccessibilityFeature.builder()
+                    .place(place)
+                    .featureType(type)
+                    .status(FeatureStatus.UNKNOWN)
+                    .build();
+            place.getFeatures().add(feature);
+        }
+
+        Place saved = placeRepository.save(place);
+        return toDto(saved, null);
+    }
+
+    /**
+     * Proposes a new place from community suggestion.
+     * Registered with isActive = false awaiting administrative review.
+     */
+    @Transactional
+    public PlaceDto suggestPlace(PlaceCreateRequest req, User user) {
+        Point point = geometryFactory.createPoint(new Coordinate(req.longitude(), req.latitude()));
+
+        Place place = Place.builder()
+                .name(req.name())
+                .description(req.description())
+                .category(req.category().toUpperCase())
+                .address(req.address())
+                .city(req.city())
+                .state(req.state())
+                .postalCode(req.postalCode())
+                .country(req.country() != null ? req.country() : "India")
+                .geom(point)
+                .phone(req.phone())
+                .website(req.website())
+                .isActive(false) // Pending review
+                .sourceName("COMMUNITY_SUGGESTION")
+                .features(new ArrayList<>())
+                .build();
+
         for (FeatureType type : FeatureType.values()) {
             AccessibilityFeature feature = AccessibilityFeature.builder()
                     .place(place)

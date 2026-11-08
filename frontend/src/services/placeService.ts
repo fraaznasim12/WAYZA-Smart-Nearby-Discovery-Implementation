@@ -1,6 +1,6 @@
 import { apiClient } from './api';
 import { ApiResponse } from '../types/auth';
-import { Place, PagedPlacesResponse, PlaceFilterParams, NearbyFilterParams, ViewportFilterParams } from '../types/place';
+import { Place, PagedPlacesResponse, PlaceFilterParams, NearbyFilterParams, ViewportFilterParams, PlaceCreatePayload } from '../types/place';
 
 export const placeService = {
   /**
@@ -80,6 +80,20 @@ export const placeService = {
 
     if (!response.data.success || !response.data.data) {
       throw new Error(response.data.error?.message || 'Failed to retrieve place details');
+    }
+
+    return response.data.data;
+  },
+
+  /**
+   * Suggests a new venue from community reporting.
+   * Registered in pending/inactive state until moderated.
+   */
+  async suggestPlace(payload: PlaceCreatePayload): Promise<Place> {
+    const response = await apiClient.post<ApiResponse<Place>>('/api/v1/places/suggest', payload);
+
+    if (!response.data.success || !response.data.data) {
+      throw new Error(response.data.error?.message || 'Failed to suggest new place');
     }
 
     return response.data.data;

@@ -517,4 +517,73 @@ class AccessibilityReportIntegrationTest {
                         .content(objectMapper.writeValueAsString(update)))
                 .andExpect(status().isForbidden());
     }
+
+    @Test
+    @DisplayName("15. User submits multi-step community report with reportType, observationStatus, impact, and rating")
+    void userSubmitsExtendedCommunityReport() throws Exception {
+        ReportCreateRequest request = ReportCreateRequest.builder()
+                .placeId(testPlace.getId())
+                .reportType(ReportType.ACCESSIBILITY_IMPROVEMENT)
+                .category(ReportCategory.DAMAGED_OR_MISSING_RAMP)
+                .issueType("STEP_FREE_ENTRANCE")
+                .observationStatus("AVAILABLE")
+                .impact("REQUIRES_ASSISTANCE")
+                .isPresent("YES")
+                .observationSource("PERSONALLY_VISITED")
+                .rating(5)
+                .whatLiked("Brand new wide ramp with handrails installed on both sides.")
+                .whatImproved("Signage could be placed closer to the main gate.")
+                .whatToKnow("Ramp slope is gentle and suitable for manual wheelchairs.")
+                .title("New accessibility ramp completed at Main Entrance")
+                .description("Inspected the newly constructed concrete ramp. Slope is gentle 1:12.")
+                .observationDate(OffsetDateTime.now().minusDays(1))
+                .build();
+
+        mockMvc.perform(post("/api/v1/reports")
+                        .header("Authorization", "Bearer " + userToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.reportType").value("ACCESSIBILITY_IMPROVEMENT"))
+                .andExpect(jsonPath("$.data.observationStatus").value("AVAILABLE"))
+                .andExpect(jsonPath("$.data.impact").value("REQUIRES_ASSISTANCE"))
+                .andExpect(jsonPath("$.data.rating").value(5))
+                .andExpect(jsonPath("$.data.whatLiked", containsString("Brand new wide ramp")))
+                .andExpect(jsonPath("$.data.status").value("PENDING"));
+
+        List<AccessibilityReport> all = reportRepository.findAll();
+        assertThat(all).hasSize(1);
+        AccessibilityReport saved = all.get(0);
+        assertThat(saved.getReportType()).isEqualTo(ReportType.ACCESSIBILITY_IMPROVEMENT);
+        assertThat(saved.getRating()).isEqualTo(5);
+        assertThat(saved.getObservationSource()).isEqualTo("PERSONALLY_VISITED");
+    }
+
+    @Test
+    @DisplayName("16. Community user can suggest a new venue for reporting in pending state")
+    void communityUserCanSuggestPlace() throws Exception {
+        com.accessmap.dto.PlaceCreateRequest suggestReq = new com.accessmap.dto.PlaceCreateRequest(
+                "Community Health Clinic Okhla",
+                "Primary health center serving Okhla Phase 2.",
+                "HOSPITAL",
+                "Plot 42, Okhla Industrial Area Phase 2",
+                "New Delhi",
+                "Delhi",
+                "110020",
+                "India",
+                28.5355,
+                77.2711,
+                "+91 11 2638 0000",
+                "https://health.delhi.gov.in"
+        );
+
+        mockMvc.perform(post("/api/v1/places/suggest")
+                        .header("Authorization", "Bearer " + userToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(suggestReq)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.name").value("Community Health Clinic Okhla"));
+    }
 }

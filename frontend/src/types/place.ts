@@ -113,3 +113,18 @@ export interface PagedPlacesResponse {
   page: PageMetadata;
 }
 
+export interface PlaceCreatePayload {
+  name: string;
+  description?: string;
+  category: string;
+  address: string;
+  city?: string;
+  state?: string;
+  postalCode?: string;
+  country?: string;
+  latitude: number;
+  longitude: number;
+  phone?: string;
+  website?: string;
+}
+

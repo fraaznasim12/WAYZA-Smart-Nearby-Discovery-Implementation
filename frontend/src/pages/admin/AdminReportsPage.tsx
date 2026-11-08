@@ -266,7 +266,7 @@ export const AdminReportsPage: React.FC = () => {
                       #{report.id.substring(0, 8)}
                     </span>
                     <span className="text-xs text-amber-300 bg-amber-950/40 px-2 py-0.5 rounded border border-amber-900/40 font-medium">
-                      {REPORT_CATEGORY_LABELS[report.category] || report.category}
+                      {(report.category && REPORT_CATEGORY_LABELS[report.category]) || report.category || 'General'}
                     </span>
                   </div>
                   <h3 className="font-semibold text-white text-base">{report.title}</h3>

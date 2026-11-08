@@ -36,11 +36,40 @@ public class AccessibilityReport {
     private User reportingUser;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "report_type", length = 50)
+    @Builder.Default
+    private ReportType reportType = ReportType.ACCESSIBILITY_ISSUE;
+
+    @Enumerated(EnumType.STRING)
     @Column(name = "category", nullable = false, length = 100)
     private ReportCategory category;
 
     @Column(name = "issue_type", length = 100)
     private String issueType;
+
+    @Column(name = "observation_status", length = 50)
+    private String observationStatus;
+
+    @Column(name = "impact", length = 50)
+    private String impact;
+
+    @Column(name = "is_present", length = 20)
+    private String isPresent;
+
+    @Column(name = "observation_source", length = 50)
+    private String observationSource;
+
+    @Column(name = "rating")
+    private Integer rating;
+
+    @Column(name = "what_liked", columnDefinition = "TEXT")
+    private String whatLiked;
+
+    @Column(name = "what_improved", columnDefinition = "TEXT")
+    private String whatImproved;
+
+    @Column(name = "what_to_know", columnDefinition = "TEXT")
+    private String whatToKnow;
 
     @Column(name = "title", nullable = false, length = 200)
     private String title;

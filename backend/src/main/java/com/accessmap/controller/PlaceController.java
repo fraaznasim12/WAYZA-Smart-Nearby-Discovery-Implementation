@@ -3,6 +3,7 @@ package com.accessmap.controller;
 import com.accessmap.dto.ApiResponse;
 import com.accessmap.dto.PlaceCreateRequest;
 import com.accessmap.dto.PlaceDto;
+import com.accessmap.entity.User;
 import com.accessmap.service.PlaceService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +13,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -103,6 +105,18 @@ public class PlaceController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<PlaceDto>> createPlace(@Valid @RequestBody PlaceCreateRequest req) {
         PlaceDto created = placeService.createPlace(req);
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.ok(created));
+    }
+
+    /**
+     * Suggests a new venue from community reporting.
+     * Accessible to authenticated users; venue is registered in pending/inactive state until moderated.
+     */
+    @PostMapping("/suggest")
+    public ResponseEntity<ApiResponse<PlaceDto>> suggestPlace(
+            @Valid @RequestBody PlaceCreateRequest req,
+            @AuthenticationPrincipal User user) {
+        PlaceDto created = placeService.suggestPlace(req, user);
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.ok(created));
     }
 }

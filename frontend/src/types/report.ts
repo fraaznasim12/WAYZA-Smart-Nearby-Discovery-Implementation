@@ -8,6 +8,41 @@ export type ReportCategory =
   | 'MISSING_SIGNAGE'
   | 'OTHER';
 
+export type ReportType =
+  | 'ACCESSIBILITY_ISSUE'
+  | 'ACCESSIBILITY_IMPROVEMENT'
+  | 'VISIT_REVIEW';
+
+export type ObservationStatus =
+  | 'AVAILABLE'
+  | 'PARTIALLY_AVAILABLE'
+  | 'NOT_AVAILABLE'
+  | 'NOT_SURE';
+
+export type ImpactLevel =
+  | 'PREVENTS_ACCESS'
+  | 'MAKES_MOVEMENT_DIFFICULT'
+  | 'REQUIRES_ASSISTANCE'
+  | 'MINOR_INCONVENIENCE'
+  | 'OTHER';
+
+export type ObservationSource =
+  | 'PERSONALLY_VISITED'
+  | 'ACCOMPANIED_VISITOR'
+  | 'OTHER_INFORMATION';
+
+export type AccessibilityFeature =
+  | 'WHEELCHAIR_ENTRANCE'
+  | 'STEP_FREE_RAMP'
+  | 'ACCESSIBLE_RESTROOM'
+  | 'ELEVATOR_ACCESS'
+  | 'MOBILITY_PARKING'
+  | 'PUBLIC_TRANSPORT'
+  | 'BRAILLE_TACTILE'
+  | 'AUDIO_ASSISTANCE'
+  | 'SEATING_WAITING'
+  | 'OTHER';
+
 export type ReportStatus =
   | 'PENDING'
   | 'IN_REVIEW'
@@ -32,8 +67,8 @@ export interface AccessibilityReport {
   reportingUserId: string;
   reportingUserName: string;
   reportingUserEmail?: string;
-  category: ReportCategory;
-  categoryDisplayName: string;
+  category?: ReportCategory;
+  categoryDisplayName?: string;
   issueType?: string;
   title: string;
   description: string;
@@ -52,11 +87,22 @@ export interface AccessibilityReport {
   photos: ReportPhoto[];
   createdAt: string;
   updatedAt: string;
+  // Extended community report fields
+  reportType?: ReportType;
+  reportTypeDisplayName?: string;
+  observationStatus?: ObservationStatus;
+  impact?: ImpactLevel;
+  isPresent?: string;
+  observationSource?: ObservationSource;
+  rating?: number;
+  whatLiked?: string;
+  whatImproved?: string;
+  whatToKnow?: string;
 }
 
 export interface ReportCreatePayload {
   placeId: string;
-  category: ReportCategory;
+  category?: ReportCategory;
   issueType?: string;
   title: string;
   description: string;
@@ -67,6 +113,16 @@ export interface ReportCreatePayload {
     url: string;
     caption?: string;
   }[];
+  // Extended community report fields
+  reportType?: ReportType;
+  observationStatus?: ObservationStatus;
+  impact?: ImpactLevel;
+  isPresent?: string;
+  observationSource?: ObservationSource;
+  rating?: number;
+  whatLiked?: string;
+  whatImproved?: string;
+  whatToKnow?: string;
 }
 
 export interface ReportStatusUpdatePayload {

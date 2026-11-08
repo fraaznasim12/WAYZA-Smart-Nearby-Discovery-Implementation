@@ -12,6 +12,7 @@ import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { MyReportsPage } from './pages/MyReportsPage';
+import { NewReportPage } from './pages/NewReportPage';
 import { MyDisputesPage } from './pages/MyDisputesPage';
 import { AdminLayout } from './pages/admin/AdminLayout';
 import { AdminOverviewPage } from './pages/admin/AdminOverviewPage';
@@ -66,6 +67,14 @@ export const App: React.FC = () => {
             element={
               <ProtectedRoute>
                 <DashboardPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/reports/new"
+            element={
+              <ProtectedRoute>
+                <NewReportPage />
               </ProtectedRoute>
             }
           />
