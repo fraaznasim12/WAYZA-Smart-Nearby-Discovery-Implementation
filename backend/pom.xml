@@ -224,10 +224,6 @@
               <version>${lombok.version}</version>
             </path>
           </annotationProcessorPaths>
-          <!-- Suppress JDK 26 unsafe / restricted-method warnings in Maven output -->
-          <compilerArgs>
-            <arg>-Xlint:-restricted</arg>
-          </compilerArgs>
         </configuration>
       </plugin>
 
