@@ -116,6 +116,8 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 // Public authentication endpoints
                 .requestMatchers("/api/v1/auth/register", "/api/v1/auth/login").permitAll()
+                // Public location suggestions and Indian administrative hierarchy
+                .requestMatchers(HttpMethod.GET, "/api/v1/locations/**").permitAll()
                 // Public read-only place discovery and accessibility profiles/catalogue
                 .requestMatchers(HttpMethod.GET, "/api/v1/places/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/accessibility-features").permitAll()
@@ -129,6 +131,8 @@ public class SecurityConfig {
                 .requestMatchers("/actuator/**").permitAll()
                 // AI Assistant endpoints (publicly accessible with IP/user rate limiting)
                 .requestMatchers("/api/v1/ai/assistant/**").permitAll()
+                // Community review submissions (any authenticated user)
+                .requestMatchers(HttpMethod.POST, "/api/v1/places/*/reviews").hasAnyRole("USER", "CONTRIBUTOR", "BUSINESS", "BUSINESS_OWNER", "ADMIN")
                 // Observation submissions and evidence uploads (any authenticated user)
                 .requestMatchers(HttpMethod.POST, "/api/v1/places/*/observations").hasAnyRole("USER", "CONTRIBUTOR", "BUSINESS", "BUSINESS_OWNER", "ADMIN")
                 .requestMatchers(HttpMethod.POST, "/api/v1/places/*/accessibility/observations").hasAnyRole("USER", "CONTRIBUTOR", "BUSINESS", "BUSINESS_OWNER", "ADMIN")

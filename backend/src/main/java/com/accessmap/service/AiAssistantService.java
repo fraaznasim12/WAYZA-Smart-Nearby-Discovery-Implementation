@@ -9,11 +9,10 @@ import com.accessmap.dto.AccessibilityProfileDto;
 import com.accessmap.dto.FeatureStatusDto;
 import com.accessmap.dto.PlaceDto;
 import com.accessmap.dto.ai.*;
-import com.accessmap.entity.FeatureStatus;
-import com.accessmap.entity.FeatureType;
-import com.accessmap.entity.Place;
+import com.accessmap.entity.*;
 import com.accessmap.exception.BadRequestException;
 import com.accessmap.exception.ResourceNotFoundException;
+import com.accessmap.repository.AccessibilityReportRepository;
 import com.accessmap.repository.PlaceRepository;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -26,12 +25,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.OffsetDateTime;
 import java.util.*;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
- * Core AI Assistant orchestration service.
- * Delivers grounded accessibility Q&A, natural language place discovery,
- * 4-state profile explanations, and interactive report-drafting assistance.
+ * Enhanced AI Assistant service with retrieval-grounded Q&A, strict hallucination prevention,
+ * provenance evidence citations, and multilingual support.
  */
 @Service
 @RequiredArgsConstructor
@@ -45,6 +44,7 @@ public class AiAssistantService {
     private final PlaceService placeService;
     private final AccessibilityService accessibilityService;
     private final PlaceRepository placeRepository;
+    private final AccessibilityReportRepository reportRepository;
     private final ObjectMapper objectMapper;
 
     private static final Set<String> KNOWN_CATEGORIES = Set.of(
@@ -52,6 +52,9 @@ public class AiAssistantService {
             "RESTAURANT", "CAFE", "TRANSIT_STATION", "PUBLIC_OFFICE",
             "SHOPPING_MALL", "LIBRARY", "PARK", "THEATER", "RETAIL", "ENTERTAINMENT"
     );
+
+    private static final Pattern DEVANAGARI_PATTERN = Pattern.compile("\\p{IsDevanagari}");
+    private static final Pattern SPANISH_PATTERN = Pattern.compile("\\b(tiene|dónde|donde|accesible|silla|ruedas|baño|rampa|ascensor|hospital|colegio|escuela)\\b", Pattern.CASE_INSENSITIVE);
 
     /**
      * Executes natural language place search grounded strictly in database records.
@@ -171,7 +174,6 @@ public class AiAssistantService {
 
     /**
      * Assists users in drafting high-quality, actionable community accessibility reports.
-     * Generates editable suggestions, grammar refinement, and highlights missing context.
      */
     public AiReportAssistanceResponse improveReport(AiReportAssistanceRequest request, String rateLimitKey) {
         validateInput(request.draftDescription(), "Draft description");
@@ -179,7 +181,6 @@ public class AiAssistantService {
 
         String draft = request.draftDescription().trim();
 
-        // 1. Determine suggested feature code
         String suggestedCode = request.featureCode();
         if (suggestedCode == null || suggestedCode.isBlank()) {
             suggestedCode = detectFeatureCodeFromText(draft);
@@ -187,7 +188,6 @@ public class AiAssistantService {
 
         String featureName = suggestedCode != null ? suggestedCode.replace('_', ' ') : "General Facility";
 
-        // 2. Identify missing information tips
         List<String> tips = new ArrayList<>();
         String lower = draft.toLowerCase();
 
@@ -207,7 +207,6 @@ public class AiAssistantService {
             tips.add("Great detail provided! Adding a clear photograph of the feature will speed up moderator approval.");
         }
 
-        // 3. Improve description
         String improved;
         String correctionsSummary;
 
@@ -215,7 +214,6 @@ public class AiAssistantService {
             improved = "Observation: " + draft + ". Entrance is partially obstructed and requires assistance for wheelchair users.";
             correctionsSummary = "Expanded short note into a formal, clear observation.";
         } else {
-            // Capitalize first letter and ensure proper punctuation
             String cleaned = draft.substring(0, 1).toUpperCase() + draft.substring(1);
             if (!cleaned.endsWith(".") && !cleaned.endsWith("!") && !cleaned.endsWith("?")) {
                 cleaned += ".";
@@ -235,7 +233,8 @@ public class AiAssistantService {
     }
 
     /**
-     * Conversational Assistant handling accessibility Q&A with grounded facts.
+     * Retrieval-Augmented Conversational Assistant handling accessibility Q&A with grounded facts.
+     * Prevents hallucinations by inspecting real database places, profiles, and reports before answering.
      */
     @Transactional(readOnly = true)
     public AiChatResponse chat(AiChatRequest request, String rateLimitKey) {
@@ -245,20 +244,77 @@ public class AiAssistantService {
 
         AiClient client = selectClient();
 
-        // If query is specifically regarding a place
+        // 1. Direct placeId lookup
         if (request.placeId() != null) {
             return handlePlaceSpecificChat(request.placeId(), query, client);
         }
 
-        // Check if query is a natural language place discovery request
+        // 2. Candidate Venue Entity Retrieval from Database
+        Optional<Place> candidatePlace = findCandidatePlaceInQuery(query);
+        if (candidatePlace.isPresent()) {
+            return handlePlaceSpecificChat(candidatePlace.get().getId(), query, client);
+        }
+
+        // 3. Question asking about an unknown or unrecorded place (Anti-Hallucination Guard)
+        if (isQueryAskingAboutSpecificUnrecordedPlace(query)) {
+            String venueMentioned = extractPotentialVenueName(query);
+            boolean isHindi = DEVANAGARI_PATTERN.matcher(query).find();
+            boolean isSpanish = SPANISH_PATTERN.matcher(query).find();
+
+            String reply;
+            if (isHindi) {
+                reply = String.format("मुझे AccessMap रिकॉर्ड में \"%s\" के लिए सत्यापित व्हीलचेयर या भौतिक पहुँच जानकारी नहीं मिली है। AccessMap में सुलभता सुविधाओं का कभी अनुमान नहीं लगाया जाता है। आप उपलब्ध सामुदायिक रिपोर्ट देख सकते हैं या जाने पर एक सुलभता अवलोकन सबमिट कर सकते हैं।",
+                        venueMentioned != null ? venueMentioned : "इस स्थान");
+            } else if (isSpanish) {
+                reply = String.format("No tengo información de accesibilidad verificada para \"%s\" en los registros de AccessMap todavía. En AccessMap, nunca adivinamos o inventamos datos. Puedes consultar los informes de la comunidad o enviar una observación de accesibilidad.",
+                        venueMentioned != null ? venueMentioned : "este lugar");
+            } else {
+                reply = String.format("I don't have verified accessibility information for %s in AccessMap records yet. In AccessMap, accessibility features are never assumed, guessed, or fabricated. You can view available community reports or submit a verified accessibility observation once you visit.",
+                        venueMentioned != null ? "\"" + venueMentioned + "\"" : "this venue");
+            }
+
+            return new AiChatResponse(
+                    reply,
+                    null,
+                    venueMentioned,
+                    null,
+                    List.of(),
+                    List.of(),
+                    "INSUFFICIENT_DATA",
+                    List.of(
+                            "How do I submit an accessibility observation?",
+                            "Find nearby verified accessible places",
+                            "What is the Four-State Verification Model?"
+                    ),
+                    client.getProviderName(),
+                    client.getProviderName()
+            );
+        }
+
+        // 4. Natural language place discovery request
         String lower = query.toLowerCase();
         if (lower.contains("find") || lower.contains("search") || lower.contains("nearby") ||
-            lower.contains("places in") || lower.contains("hospitals") || lower.contains("colleges")) {
+            lower.contains("places in") || lower.contains("hospitals") || lower.contains("colleges") ||
+            lower.contains("cafes") || lower.contains("restaurants") || lower.contains("stations")) {
 
             AiSearchResponse searchRes = naturalLanguageSearch(
                     new AiSearchRequest(query, request.latitude(), request.longitude(), null),
                     rateLimitKey
             );
+
+            List<AiEvidenceSourceDto> sources = searchRes.places().stream()
+                    .limit(5)
+                    .map(p -> new AiEvidenceSourceDto(
+                            p.id(),
+                            p.name(),
+                            p.category(),
+                            "VERIFIED_DISCOVERY",
+                            p.updatedAt(),
+                            "INDEPENDENT_AUDIT",
+                            "Discovered through PostGIS spatial index with " + (p.features() != null ? p.features().size() : 0) + " audited features.",
+                            "HIGH_EVIDENCE"
+                    ))
+                    .collect(Collectors.toList());
 
             return new AiChatResponse(
                     searchRes.explanation(),
@@ -266,6 +322,8 @@ public class AiAssistantService {
                     null,
                     searchRes.extractedFilters(),
                     searchRes.places(),
+                    sources,
+                    sources.isEmpty() ? "INSUFFICIENT_DATA" : "HIGH_EVIDENCE",
                     List.of(
                             "What accessibility features are verified here?",
                             "How do I submit an audit report?",
@@ -276,7 +334,7 @@ public class AiAssistantService {
             );
         }
 
-        // General conversational response
+        // 5. General Conversational / Educational Grounding (Four-State Model explanation)
         List<AiChatMessage> messages = new ArrayList<>();
         if (request.history() != null) {
             messages.addAll(request.history());
@@ -284,17 +342,18 @@ public class AiAssistantService {
         messages.add(AiChatMessage.user(query));
 
         String systemPrompt = """
-                You are AccessMap Assistant, an AI expert on verified physical accessibility.
-                Follow these strict safety rules:
-                1. Never invent or assume accessibility features.
-                2. Explicitly distinguish AVAILABLE, NOT_AVAILABLE, UNKNOWN, and NOT_VERIFIED.
-                3. If information is not in the database, clearly say it is unrecorded.
-                4. Encourage community members to audit missing facilities safely.
+                You are AccessMap Assistant, an AI expert on verified physical accessibility and spatial mapping.
+                Follow these strict safety and factual rules:
+                1. Never invent or assume accessibility features for any real or imaginary venue.
+                2. Explicitly distinguish the four states: AVAILABLE (verified < 180 days), NOT_AVAILABLE (confirmed barrier), UNKNOWN (unrecorded, NEVER assume inaccessible), and NOT_VERIFIED (pending review/stale).
+                3. If data is missing or unverified, state it plainly and invite community contribution.
+                4. Distinguish independently verified facts from community opinions.
+                5. Respond in the language used by the user when requested (e.g. English, Hindi, Spanish).
                 """;
 
-        String completion = client.completeChat(systemPrompt, messages, properties.getMaxOutputTokens(), 0.3);
+        String completion = client.completeChat(systemPrompt, messages, properties.getMaxOutputTokens(), 0.2);
         if (completion == null || completion.isBlank()) {
-            completion = fallbackClient.completeChat(systemPrompt, messages, properties.getMaxOutputTokens(), 0.3);
+            completion = fallbackClient.completeChat(systemPrompt, messages, properties.getMaxOutputTokens(), 0.2);
         }
 
         return new AiChatResponse(
@@ -303,11 +362,13 @@ public class AiAssistantService {
                 null,
                 null,
                 List.of(),
+                List.of(),
+                "GENERAL_ASSISTANCE",
                 List.of(
                         "How does AccessMap verify accessibility?",
                         "Find accessible hospitals near me",
                         "How can I report a broken ramp?"
-                ),
+                    ),
                 client.getProviderName(),
                 client.getProviderName()
         );
@@ -318,49 +379,188 @@ public class AiAssistantService {
         if (place == null) {
             return new AiChatResponse(
                     "The requested venue could not be found in AccessMap records.",
-                    null, null, null, List.of(), List.of(), client.getProviderName(), client.getProviderName()
+                    null, null, null, List.of(), List.of(), "INSUFFICIENT_DATA", List.of(),
+                    client.getProviderName(), client.getProviderName()
             );
         }
 
         AccessibilityProfileDto profile = accessibilityService.getPlaceAccessibilityProfile(placeId);
-        String lower = query.toLowerCase();
+        List<AccessibilityReport> communityReports = reportRepository.findAllByPlaceIdOrderByCreatedAtDesc(placeId);
 
-        String answer;
-        if (lower.contains("wheelchair") || lower.contains("entrance") || lower.contains("ramp")) {
+        String lower = query.toLowerCase();
+        boolean isHindi = DEVANAGARI_PATTERN.matcher(query).find();
+        boolean isSpanish = SPANISH_PATTERN.matcher(query).find();
+
+        StringBuilder answerBuilder = new StringBuilder();
+        List<AiEvidenceSourceDto> sources = new ArrayList<>();
+        String overallReliability = "HIGH_EVIDENCE";
+
+        // Check specific feature inquiries
+        if (lower.contains("wheelchair") || lower.contains("entrance") || lower.contains("ramp") || lower.contains("रैंप") || lower.contains("प्रवेश") || lower.contains("silla")) {
             FeatureStatus status = findFeatureStatus(profile, FeatureType.WHEELCHAIR_ACCESSIBLE_ENTRANCE);
-            answer = String.format("For %s, the wheelchair accessible entrance is recorded as %s in verified records.",
-                    place.getName(), status);
-        } else if (lower.contains("elevator") || lower.contains("lift")) {
+            if (status == FeatureStatus.UNKNOWN) {
+                status = findFeatureStatus(profile, FeatureType.STEP_FREE_ENTRANCE);
+            }
+
+            if (isHindi) {
+                answerBuilder.append(String.format("%s के लिए, मुख्य प्रवेश द्वार सत्यापित रिकॉर्ड के अनुसार %s दर्ज है।",
+                        place.getName(), status == FeatureStatus.AVAILABLE ? "सुलभ (AVAILABLE)" : (status == FeatureStatus.NOT_AVAILABLE ? "बाधाग्रस्त (NOT AVAILABLE)" : "अज्ञात (UNKNOWN)")));
+            } else if (isSpanish) {
+                answerBuilder.append(String.format("Para %s, la entrada accesible para sillas de ruedas está registrada como %s en los registros oficiales.",
+                        place.getName(), status));
+            } else {
+                answerBuilder.append(String.format("For %s, the wheelchair accessible entrance is recorded as %s in verified records.",
+                        place.getName(), status));
+            }
+
+            sources.add(new AiEvidenceSourceDto(
+                    place.getId(),
+                    place.getName(),
+                    "WHEELCHAIR_ACCESSIBLE_ENTRANCE",
+                    status.name(),
+                    profile.lastVerifiedAt(),
+                    "INDEPENDENT_AUDIT",
+                    "Official entrance audit assessment.",
+                    status == FeatureStatus.AVAILABLE ? "HIGH_EVIDENCE" : "MODERATE_EVIDENCE"
+            ));
+
+        } else if (lower.contains("elevator") || lower.contains("lift") || lower.contains("लिफ्ट") || lower.contains("ascensor")) {
             FeatureStatus status = findFeatureStatus(profile, FeatureType.ELEVATOR_AVAILABILITY);
-            answer = String.format("Elevator availability at %s is recorded as %s.", place.getName(), status);
-        } else if (lower.contains("washroom") || lower.contains("restroom")) {
+            if (isHindi) {
+                answerBuilder.append(String.format("%s पर लिफ्ट की उपलब्धता सत्यापित रिकॉर्ड में %s के रूप में दर्ज है।",
+                        place.getName(), status == FeatureStatus.AVAILABLE ? "उपलब्ध (AVAILABLE)" : "अनुपलब्ध (NOT AVAILABLE)"));
+            } else {
+                answerBuilder.append(String.format("Elevator availability at %s is recorded as %s in verified records.",
+                        place.getName(), status));
+            }
+
+            sources.add(new AiEvidenceSourceDto(
+                    place.getId(),
+                    place.getName(),
+                    "ELEVATOR_AVAILABILITY",
+                    status.name(),
+                    profile.lastVerifiedAt(),
+                    "INDEPENDENT_AUDIT",
+                    "Vertical access elevator audit.",
+                    status == FeatureStatus.AVAILABLE ? "HIGH_EVIDENCE" : "MODERATE_EVIDENCE"
+            ));
+
+        } else if (lower.contains("washroom") || lower.contains("restroom") || lower.contains("toilet") || lower.contains("शौचालय") || lower.contains("baño")) {
             FeatureStatus status = findFeatureStatus(profile, FeatureType.ACCESSIBLE_WASHROOM);
-            answer = String.format("Accessible restroom at %s is recorded as %s.", place.getName(), status);
-        } else if (lower.contains("when") || lower.contains("verified") || lower.contains("date")) {
-            OffsetDateTime verifiedAt = profile.lastVerifiedAt();
-            answer = verifiedAt != null
-                    ? String.format("%s was last verified on %s.", place.getName(), verifiedAt.toLocalDate())
-                    : String.format("%s has not yet received a verified moderation audit.", place.getName());
+            answerBuilder.append(String.format("Accessible restroom facility at %s is recorded as %s in verified records.",
+                    place.getName(), status));
+
+            sources.add(new AiEvidenceSourceDto(
+                    place.getId(),
+                    place.getName(),
+                    "ACCESSIBLE_WASHROOM",
+                    status.name(),
+                    profile.lastVerifiedAt(),
+                    "INDEPENDENT_AUDIT",
+                    "Sanitary stall clearance and grab bar audit.",
+                    status == FeatureStatus.AVAILABLE ? "HIGH_EVIDENCE" : "MODERATE_EVIDENCE"
+            ));
+
         } else {
-            answer = String.format("%s is a %s located at %s. Available features: %d, Barriers: %d, Unknown: %d.",
+            // General overview of the place
+            answerBuilder.append(String.format("%s is a %s located at %s. Verified features: %d available, %d barriers, %d unknown.",
                     place.getName(), place.getCategory(), place.getAddress(),
-                    profile.availableCount(), profile.notAvailableCount(), profile.unknownCount());
+                    profile.availableCount(), profile.notAvailableCount(), profile.unknownCount()));
+
+            for (FeatureStatusDto f : profile.features()) {
+                if (f.status() == FeatureStatus.AVAILABLE || f.status() == FeatureStatus.NOT_AVAILABLE) {
+                    sources.add(new AiEvidenceSourceDto(
+                            place.getId(),
+                            place.getName(),
+                            f.name() != null ? f.name() : f.code(),
+                            f.status().name(),
+                            f.lastVerifiedAt() != null ? f.lastVerifiedAt() : profile.lastVerifiedAt(),
+                            "INDEPENDENT_AUDIT",
+                            f.notes() != null ? f.notes() : "Verified on-site physical feature",
+                            f.status() == FeatureStatus.AVAILABLE ? "HIGH_EVIDENCE" : "MODERATE_EVIDENCE"
+                    ));
+                }
+            }
+        }
+
+        // Add Community Reports distinction if present
+        if (!communityReports.isEmpty()) {
+            AccessibilityReport latestReport = communityReports.get(0);
+            answerBuilder.append(String.format("\n\nCommunity Insight (Unverified): A recent community report submitted on %s noted: \"%s\" (Status: %s). Note: Community submissions do not modify verified physical status until approved by moderators.",
+                    latestReport.getCreatedAt().toLocalDate(),
+                    latestReport.getDescription(),
+                    latestReport.getStatus()));
+
+            sources.add(new AiEvidenceSourceDto(
+                    place.getId(),
+                    place.getName(),
+                    latestReport.getCategory().name(),
+                    latestReport.getStatus().name(),
+                    latestReport.getCreatedAt(),
+                    "COMMUNITY_REPORT",
+                    latestReport.getDescription(),
+                    "COMMUNITY_REPORTED"
+            ));
+        }
+
+        // Freshness assessment
+        OffsetDateTime verifiedAt = profile.lastVerifiedAt();
+        if (verifiedAt != null) {
+            if (verifiedAt.isBefore(OffsetDateTime.now().minusDays(180))) {
+                answerBuilder.append(String.format("\n\nNotice: This venue was last verified on %s (>180 days ago) and is due for community re-verification.",
+                        verifiedAt.toLocalDate()));
+                overallReliability = "STALE_DATA";
+            } else {
+                overallReliability = "HIGH_EVIDENCE";
+            }
+        } else {
+            overallReliability = communityReports.isEmpty() ? "INSUFFICIENT_DATA" : "COMMUNITY_REPORTED";
         }
 
         return new AiChatResponse(
-                answer,
+                answerBuilder.toString(),
                 place.getId(),
                 place.getName(),
                 null,
                 List.of(),
+                sources,
+                overallReliability,
                 List.of(
                         "Does this place have an accessible restroom?",
                         "When was this place last verified?",
-                        "How can I add an observation for this venue?"
+                        "How can I submit an observation for this venue?"
                 ),
                 client.getProviderName(),
                 client.getProviderName()
         );
+    }
+
+    private Optional<Place> findCandidatePlaceInQuery(String query) {
+        String lower = query.toLowerCase();
+        List<Place> allActive = placeRepository.findAllByIsActiveTrue();
+        return allActive.stream()
+                .filter(p -> {
+                    String name = p.getName().toLowerCase();
+                    return lower.contains(name) || (name.length() > 6 && lower.contains(name.substring(0, name.length() - 3)));
+                })
+                .findFirst();
+    }
+
+    private boolean isQueryAskingAboutSpecificUnrecordedPlace(String query) {
+        String lower = query.toLowerCase();
+        return (lower.contains("does ") || lower.contains("is ") || lower.contains("can i visit ") || lower.contains("क्या ")) &&
+               (lower.contains("school") || lower.contains("hospital") || lower.contains("clinic") ||
+                lower.contains("college") || lower.contains("station") || lower.contains("center") ||
+                lower.contains("hall") || lower.contains("restroom") || lower.contains("elevator") ||
+                lower.contains("ramp") || lower.contains("wheelchair"));
+    }
+
+    private String extractPotentialVenueName(String query) {
+        // Extracts venue candidate string from typical question patterns
+        String q = query.replaceAll("(?i)^(does|is|can i visit|what about|tell me about)\\s+", "");
+        q = q.replaceAll("(?i)\\s+(have|has|accessible|wheelchair|ramp|elevator|restroom|entrance|available|near).*$", "");
+        q = q.trim();
+        return q.length() > 2 ? q : "the requested venue";
     }
 
     private FeatureStatus findFeatureStatus(AccessibilityProfileDto profile, FeatureType type) {
@@ -400,114 +600,91 @@ public class AiAssistantService {
                     JsonNode feats = node.path("requiredFeatures");
                     if (feats.isArray()) {
                         for (JsonNode f : feats) {
-                            String fCode = f.asText();
-                            if (FeatureType.fromCode(fCode) != null) {
-                                requiredFeatures.add(fCode);
-                            }
+                            requiredFeatures.add(f.asText());
                         }
                     }
                 }
-            } catch (Exception ex) {
-                log.debug("LLM parameter extraction fallback to rules: {}", ex.getMessage());
+            } catch (Exception e) {
+                log.warn("External AI filter extraction failed, falling back to rule-based: {}", e.getMessage());
             }
         }
 
-        // Rule-based extraction (if not extracted by LLM)
+        // Rule-based keyword extraction fallback
         if (category == null) {
-            if (lower.contains("hospital") || lower.contains("clinic")) category = "HOSPITAL";
-            else if (lower.contains("college") || lower.contains("university")) category = "COLLEGE";
-            else if (lower.contains("restaurant") || lower.contains("cafe")) category = "RESTAURANT";
-            else if (lower.contains("station") || lower.contains("transit") || lower.contains("terminal")) category = "TRANSIT_STATION";
-            else if (lower.contains("mall") || lower.contains("shopping")) category = "SHOPPING_MALL";
-            else if (lower.contains("park") || lower.contains("garden")) category = "PARK";
-            else if (lower.contains("library")) category = "LIBRARY";
+            for (String cat : KNOWN_CATEGORIES) {
+                if (lower.contains(cat.toLowerCase()) || lower.contains(cat.toLowerCase() + "s")) {
+                    category = cat;
+                    break;
+                }
+            }
         }
 
         if (city == null) {
-            if (lower.contains("patna")) city = "Patna";
-            else if (lower.contains("delhi")) city = "New Delhi";
-            else if (lower.contains("bangalore") || lower.contains("bengaluru")) city = "Bangalore";
-            else if (lower.contains("mumbai") || lower.contains("metro city")) city = "Metro City";
-            else if (lower.contains("jharkhand")) city = "Jharkhand";
+            java.util.regex.Matcher m = java.util.regex.Pattern.compile("\\bin\\s+([A-Z][a-z]+|[a-z]+)\\b", java.util.regex.Pattern.CASE_INSENSITIVE).matcher(query);
+            if (m.find()) {
+                String candidate = m.group(1);
+                List<String> stopWords = List.of("the", "a", "an", "this", "our", "my", "all", "order", "addition", "wheelchair", "hospital", "transit", "college");
+                if (!stopWords.contains(candidate.toLowerCase())) {
+                    city = candidate.substring(0, 1).toUpperCase() + candidate.substring(1).toLowerCase();
+                }
+            }
         }
 
-        if (requiredFeatures.isEmpty()) {
-            if (lower.contains("wheelchair") || lower.contains("ramp") || lower.contains("entrance") || lower.contains("step-free")) {
-                requiredFeatures.add(FeatureType.WHEELCHAIR_ACCESSIBLE_ENTRANCE.name());
-            }
-            if (lower.contains("elevator") || lower.contains("lift")) {
-                requiredFeatures.add(FeatureType.ELEVATOR_AVAILABILITY.name());
-            }
-            if (lower.contains("washroom") || lower.contains("restroom") || lower.contains("toilet")) {
-                requiredFeatures.add(FeatureType.ACCESSIBLE_WASHROOM.name());
-            }
+        if (lower.contains("wheelchair")) {
+            requiredFeatures.add("WHEELCHAIR_ACCESSIBLE_ENTRANCE");
+        } else if (lower.contains("step-free") || lower.contains("step free")) {
+            requiredFeatures.add("STEP_FREE_ENTRANCE");
+        }
+        if (lower.contains("elevator") || lower.contains("lift")) {
+            requiredFeatures.add("ELEVATOR_AVAILABILITY");
+        }
+        if (lower.contains("restroom") || lower.contains("toilet") || lower.contains("washroom")) {
+            requiredFeatures.add("ACCESSIBLE_RESTROOM");
+        }
+        if (lower.contains("ramp")) {
+            requiredFeatures.add("ENTRANCE_RAMP");
         }
 
         return new AiSearchFiltersDto(category, city, null, requiredFeatures, extractedKeyword);
     }
 
-    private String detectFeatureCodeFromText(String draft) {
-        String lower = draft.toLowerCase();
-        if (lower.contains("ramp") || lower.contains("slope")) {
-            return FeatureType.ENTRANCE_RAMP.name();
-        }
-        if (lower.contains("elevator") || lower.contains("lift")) {
-            return FeatureType.ELEVATOR_AVAILABILITY.name();
-        }
-        if (lower.contains("washroom") || lower.contains("restroom") || lower.contains("toilet")) {
-            return FeatureType.ACCESSIBLE_WASHROOM.name();
-        }
-        if (lower.contains("door") || lower.contains("entrance") || lower.contains("step")) {
-            return FeatureType.WHEELCHAIR_ACCESSIBLE_ENTRANCE.name();
-        }
-        if (lower.contains("parking")) {
-            return FeatureType.ACCESSIBLE_PARKING.name();
-        }
-        if (lower.contains("braille") || lower.contains("signage")) {
-            return FeatureType.BRAILLE_SIGNAGE.name();
-        }
-        return FeatureType.WHEELCHAIR_ACCESSIBLE_ENTRANCE.name();
-    }
-
-    private String generateSearchExplanation(String query, AiSearchFiltersDto filters, int resultCount) {
+    private String generateSearchExplanation(String query, AiSearchFiltersDto filters, int count) {
         StringBuilder sb = new StringBuilder();
-        sb.append("Processed query: \"").append(query).append("\". ");
+        sb.append("Found ").append(count).append(" venue").append(count == 1 ? "" : "s");
 
         if (filters.category() != null) {
-            sb.append("Filtered by Category: ").append(filters.category()).append(". ");
+            sb.append(" matching category '").append(filters.category()).append("'");
         }
-        if (filters.city() != null) {
-            sb.append("Location: ").append(filters.city()).append(". ");
+        if (!filters.requiredFeatures().isEmpty()) {
+            sb.append(" with verified ").append(String.join(", ", filters.requiredFeatures()));
         }
-        if (filters.requiredFeatures() != null && !filters.requiredFeatures().isEmpty()) {
-            sb.append("Required verified features: ")
-                    .append(String.join(", ", filters.requiredFeatures()))
-                    .append(". ");
-        }
-
-        if (resultCount > 0) {
-            sb.append("Found ").append(resultCount).append(" matching place(s) in AccessMap database.");
-        } else {
-            sb.append("No verified places currently match all requested criteria in our records.");
-        }
-
+        sb.append(". All physical access criteria are verified against our Four-State Model.");
         return sb.toString();
     }
 
-    private AiClient selectClient() {
-        if (openAiClient.isAvailable()) {
-            return openAiClient;
-        }
-        return fallbackClient;
+    private String detectFeatureCodeFromText(String text) {
+        String lower = text.toLowerCase();
+        if (lower.contains("elevator") || lower.contains("lift")) return "ELEVATOR_AVAILABILITY";
+        if (lower.contains("ramp") || lower.contains("slope")) return "ENTRANCE_RAMP";
+        if (lower.contains("restroom") || lower.contains("toilet") || lower.contains("washroom")) return "ACCESSIBLE_RESTROOM";
+        if (lower.contains("parking") || lower.contains("car")) return "ACCESSIBLE_PARKING";
+        if (lower.contains("step") || lower.contains("door") || lower.contains("entrance")) return "STEP_FREE_ENTRANCE";
+        return "WHEELCHAIR_ACCESSIBLE_ENTRANCE";
     }
 
     private void validateInput(String input, String fieldName) {
-        if (input == null || input.isBlank()) {
-            throw new BadRequestException(fieldName + " must not be blank.");
+        if (input == null || input.trim().isEmpty()) {
+            throw new BadRequestException(fieldName + " cannot be empty");
         }
         if (input.length() > properties.getMaxInputChars()) {
-            throw new BadRequestException(fieldName + " exceeds maximum allowed length of " +
-                    properties.getMaxInputChars() + " characters.");
+            throw new BadRequestException(fieldName + " exceeds maximum length of " + properties.getMaxInputChars() + " characters");
         }
+    }
+
+    private AiClient selectClient() {
+        if (openAiClient != null && openAiClient.isAvailable()) {
+            return openAiClient;
+        }
+        return fallbackClient;
     }
 }

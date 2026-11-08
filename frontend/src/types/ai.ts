@@ -36,12 +36,25 @@ export interface AiChatRequest {
   longitude?: number | null;
 }
 
+export interface AiEvidenceSource {
+  placeId: string;
+  venueName: string;
+  featureType: string;
+  status: string;
+  verificationDate?: string | null;
+  sourceCategory: string;
+  evidenceSummary: string;
+  reliabilityRating: string;
+}
+
 export interface AiChatResponse {
   reply: string;
   placeId?: string | null;
   placeName?: string | null;
   structuredFilters?: AiSearchFilters | null;
   matchedPlaces?: Place[];
+  sources?: AiEvidenceSource[];
+  reliabilityRating?: string;
   suggestedQuestions?: string[];
   modelUsed: string;
   providerUsed: string;

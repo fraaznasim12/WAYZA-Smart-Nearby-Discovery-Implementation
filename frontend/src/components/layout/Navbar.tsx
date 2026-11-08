@@ -48,7 +48,7 @@ export const Navbar: React.FC = () => {
             aria-label="AccessMap Home"
             onClick={closeMobileMenu}
           >
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#102A43] to-[#0F766E] flex items-center justify-center text-white shadow-md shadow-slate-900/10 group-hover:shadow-teal-900/20 transition-all">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#101C36] via-[#17365B] to-[#0F9D91] flex items-center justify-center text-white shadow-md shadow-slate-900/10 group-hover:shadow-teal-900/20 transition-all">
               <Compass className="w-5 h-5 transition-transform duration-300 group-hover:rotate-45" aria-hidden="true" />
             </div>
             <div className="flex flex-col">
@@ -137,7 +137,7 @@ export const Navbar: React.FC = () => {
                 <button 
                   type="button"
                   onClick={() => navigate('/register')}
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#0F766E] text-white text-xs font-bold shadow-xs hover:bg-[#115E59] hover:shadow-md transition-all cursor-pointer"
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-[#0F9D91] to-[#2DD4BF] text-white text-xs font-bold shadow-xs hover:opacity-95 hover:shadow-md transition-all cursor-pointer"
                 >
                   <span>Get Started</span>
                   <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />

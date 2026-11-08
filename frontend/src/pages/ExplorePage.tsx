@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
+import { IndianLocationSelector } from '../components/common/IndianLocationSelector';
 import {
   Search,
   MapPin,
@@ -35,9 +36,12 @@ import { PlaceMap } from '../components/map/PlaceMap';
 import { placeService } from '../services/placeService';
 import { Place, PageMetadata } from '../types/place';
 import { AccessibilityProfileSection } from '../components/accessibility/AccessibilityProfileSection';
+import { CommunityReviewsSection } from '../components/community/CommunityReviewsSection';
+import { useAuth } from '../context/AuthContext';
 
 export const ExplorePage: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
+  const { isAuthenticated } = useAuth();
 
   // Search Input State (controlled inputs)
   const [searchInput, setSearchInput] = useState<string>(searchParams.get('q') || '');
@@ -89,6 +93,10 @@ export const ExplorePage: React.FC = () => {
     const stateVal = searchParams.get('state') || '';
     setStateFilter(stateVal);
     setStateInput(stateVal);
+    const feat = searchParams.get('feature');
+    if (feat) {
+      setSelectedFeatures([feat]);
+    }
   }, [searchParams]);
 
   // Smooth scroll to selected place details on mobile / viewport focus
@@ -520,27 +528,27 @@ export const ExplorePage: React.FC = () => {
               />
             </div>
 
-            {/* 2. City Filter Input */}
-            <div className="md:col-span-2 relative">
-              <MapPin className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-              <input
-                type="text"
-                placeholder="City (e.g. Mumbai, Patna)..."
+            {/* 2. City Filter — Indian Location Autocomplete */}
+            <div className="md:col-span-2">
+              <IndianLocationSelector
                 value={cityInput}
-                onChange={(e) => setCityInput(e.target.value)}
-                className="w-full pl-9 pr-3 py-2.5 text-xs rounded-xl border border-[#D9E2EC] focus:outline-hidden focus:ring-2 focus:ring-[#0F766E] focus:border-[#0F766E] bg-white transition-shadow text-[#172B3A] placeholder-[#627D98]"
+                onChange={(val) => {
+                  setCityInput(val);
+                }}
+                placeholder="City (e.g. Mumbai, Patna)…"
+                aria-label="Filter by city"
               />
             </div>
 
-            {/* 3. State Filter Input */}
-            <div className="md:col-span-2 relative">
-              <Landmark className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-              <input
-                type="text"
-                placeholder="State (e.g. Maharashtra)..."
+            {/* 3. State Filter — Indian Location Autocomplete */}
+            <div className="md:col-span-2">
+              <IndianLocationSelector
                 value={stateInput}
-                onChange={(e) => setStateInput(e.target.value)}
-                className="w-full pl-9 pr-3 py-2.5 text-xs rounded-xl border border-[#D9E2EC] focus:outline-hidden focus:ring-2 focus:ring-[#0F766E] focus:border-[#0F766E] bg-white transition-shadow text-[#172B3A] placeholder-[#627D98]"
+                onChange={(val) => {
+                  setStateInput(val);
+                }}
+                placeholder="State (e.g. Maharashtra)…"
+                aria-label="Filter by state"
               />
             </div>
 
@@ -609,6 +617,7 @@ export const ExplorePage: React.FC = () => {
               { code: 'ELEVATOR_AVAILABILITY', label: 'Working Elevator' },
               { code: 'ACCESSIBLE_RESTROOM', label: 'Accessible Restroom' },
               { code: 'ACCESSIBLE_PARKING', label: 'Reserved Parking' },
+              { code: 'PUBLIC_TRANSPORT_ACCESSIBILITY', label: 'Transit Access' },
             ].map((f) => {
               const active = selectedFeatures.includes(f.code);
               return (
@@ -899,16 +908,25 @@ export const ExplorePage: React.FC = () => {
               </div>
               <h3 className="text-lg font-bold text-slate-900">No venues found</h3>
               <p className="text-xs text-slate-600 max-w-sm mx-auto mt-2 mb-6">
-                No places match your current search terms or proximity radius. Try selecting a different category or clearing the search filters.
+                No places match your current search terms or accessibility criteria. Try clearing filters or submit a new community accessibility observation.
               </p>
-              <button
-                type="button"
-                onClick={handleResetFilters}
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-teal-600 text-white text-xs font-semibold hover:bg-teal-700 transition-colors cursor-pointer"
-              >
-                <RotateCcw className="w-3.5 h-3.5" />
-                <span>Reset All Filters</span>
-              </button>
+              <div className="flex flex-wrap items-center justify-center gap-3">
+                <button
+                  type="button"
+                  onClick={handleResetFilters}
+                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-100 text-slate-700 text-xs font-semibold hover:bg-slate-200 transition-colors cursor-pointer"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" />
+                  <span>Reset All Filters</span>
+                </button>
+                <Link
+                  to="/contact"
+                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#0F9D91] text-white text-xs font-semibold hover:bg-[#0c7e75] transition-colors shadow-sm"
+                >
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span>Contribute Venue Info</span>
+                </Link>
+              </div>
             </div>
           )}
 
@@ -1124,6 +1142,15 @@ export const ExplorePage: React.FC = () => {
                   {/* Accessibility Profile Audit */}
                   <div className="pt-4 border-t border-slate-100">
                     <AccessibilityProfileSection placeId={selectedPlace.id} placeName={selectedPlace.name} />
+                  </div>
+
+                  {/* Community Reviews */}
+                  <div className="pt-4 border-t border-slate-100">
+                    <CommunityReviewsSection
+                      placeId={selectedPlace.id}
+                      placeName={selectedPlace.name}
+                      isAuthenticated={isAuthenticated}
+                    />
                   </div>
                 </div>
               ) : (

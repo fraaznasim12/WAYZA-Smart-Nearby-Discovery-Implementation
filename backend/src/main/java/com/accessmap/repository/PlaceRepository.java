@@ -112,6 +112,10 @@ public interface PlaceRepository extends JpaRepository<Place, UUID>, JpaSpecific
 
     List<Place> findAllByIsActiveTrue();
 
+    List<Place> findByNameContainingIgnoreCaseAndIsActiveTrue(String name);
+
+    List<Place> findTop5ByNameContainingIgnoreCaseAndIsActiveTrue(String name);
+
     Optional<Place> findByExternalSourceId(String externalSourceId);
 
     boolean existsByExternalSourceId(String externalSourceId);

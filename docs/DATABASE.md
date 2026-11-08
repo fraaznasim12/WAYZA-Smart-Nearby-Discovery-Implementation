@@ -307,4 +307,6 @@ Schema changes are tracked version-by-version using Flyway:
 - `V11__advanced_verification_and_disputes.sql`: Detailed dispute categories, dispute photos, and review assignments.
 - `V12__admin_dashboard_and_platform_management.sql`: `admin_audit_logs`, `platform_settings`, and `data_import_history`.
 - `V13__notifications_and_realtime_updates.sql`: `notifications`, `notification_preferences`, and real-time SSE support.
+- `V14__community_reviews.sql`: `place_reviews` and `review_photos` tables with moderation statuses (`PENDING`, `APPROVED`, `REJECTED`), separate from certified accessibility audits.
+
 

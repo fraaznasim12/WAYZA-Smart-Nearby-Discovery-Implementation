@@ -1,8 +1,9 @@
 import React, { Suspense, useState, useEffect, Component, ErrorInfo, ReactNode } from 'react';
 import { Canvas } from '@react-three/fiber';
-import { Float, OrbitControls, RoundedBox } from '@react-three/drei';
+import { Float, OrbitControls } from '@react-three/drei';
 import { usePrefersReducedMotion } from '../hooks/usePrefersReducedMotion';
-import { ShieldCheck, Compass } from 'lucide-react';
+import { ShieldCheck, Sparkles } from 'lucide-react';
+import { Category3DScene, resolveVenueCategory, Venue3DCategory } from './3d/Category3DScene';
 
 /* -------------------------------------------------------------------------- */
 /* WebGL Error Boundary (Progressive Enhancement Guarantee)                  */
@@ -39,95 +40,34 @@ class ThreeErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryStat
 }
 
 /* -------------------------------------------------------------------------- */
-/* 3D Scene Components                                                        */
+/* Floating Pin Marker                                                        */
 /* -------------------------------------------------------------------------- */
-
-// Floating Pin Marker
 const LocationPin: React.FC = () => {
   return (
-    <group position={[0, 1.4, 0]}>
+    <group position={[0, 1.45, 0]}>
       {/* Upper sphere with teal glow */}
       <mesh position={[0, 0.4, 0]} castShadow>
-        <sphereGeometry args={[0.32, 32, 32]} />
-        <meshStandardMaterial color="#0d9488" roughness={0.2} metalness={0.2} />
+        <sphereGeometry args={[0.3, 32, 32]} />
+        <meshStandardMaterial color="#0F9D91" roughness={0.2} metalness={0.2} />
       </mesh>
 
       {/* Inner beacon core */}
       <mesh position={[0, 0.4, 0]}>
-        <sphereGeometry args={[0.16, 16, 16]} />
-        <meshStandardMaterial color="#ffffff" emissive="#5eead4" emissiveIntensity={0.6} />
+        <sphereGeometry args={[0.15, 16, 16]} />
+        <meshStandardMaterial color="#ffffff" emissive="#2DD4BF" emissiveIntensity={0.6} />
       </mesh>
 
       {/* Tapered cone point */}
       <mesh position={[0, 0, 0]} rotation={[0, 0, Math.PI]}>
-        <coneGeometry args={[0.26, 0.5, 32]} />
-        <meshStandardMaterial color="#0f766e" roughness={0.3} metalness={0.2} />
+        <coneGeometry args={[0.24, 0.48, 32]} />
+        <meshStandardMaterial color="#17365B" roughness={0.3} metalness={0.2} />
       </mesh>
 
       {/* Accessibility aura ring */}
       <mesh position={[0, -0.28, 0]} rotation={[-Math.PI / 2, 0, 0]}>
         <ringGeometry args={[0.25, 0.4, 32]} />
-        <meshStandardMaterial color="#14b8a6" transparent opacity={0.6} roughness={0.1} />
+        <meshStandardMaterial color="#2DD4BF" transparent opacity={0.65} roughness={0.1} />
       </mesh>
-    </group>
-  );
-};
-
-// Accessible Architectural Spatial Elements
-const AccessibleModel: React.FC = () => {
-  return (
-    <group position={[0, -0.4, 0]}>
-      {/* Ground Foundation Slab */}
-      <RoundedBox args={[3.2, 0.16, 3.2]} radius={0.06} smoothness={4} position={[0, -0.08, 0]} receiveShadow>
-        <meshStandardMaterial color="#f1f5f9" roughness={0.4} />
-      </RoundedBox>
-
-      {/* Raised Step-Free Platform */}
-      <RoundedBox args={[1.8, 0.36, 1.6]} radius={0.06} smoothness={4} position={[0.5, 0.18, -0.5]} castShadow receiveShadow>
-        <meshStandardMaterial color="#ffffff" roughness={0.2} />
-      </RoundedBox>
-
-      {/* Gentle Access Ramp (1:12 slope representation) */}
-      <group position={[-0.7, 0.1, 0.3]} rotation={[0, -Math.PI / 4, 0]}>
-        <mesh rotation={[-0.18, 0, 0]} position={[0, 0.08, 0]} castShadow receiveShadow>
-          <boxGeometry args={[0.9, 0.08, 1.4]} />
-          <meshStandardMaterial color="#ccfbf1" roughness={0.3} />
-        </mesh>
-
-        {/* Ramp Guide Rails */}
-        <mesh position={[-0.48, 0.22, 0]}>
-          <boxGeometry args={[0.04, 0.35, 1.4]} />
-          <meshStandardMaterial color="#0d9488" metalness={0.4} roughness={0.2} />
-        </mesh>
-        <mesh position={[0.48, 0.22, 0]}>
-          <boxGeometry args={[0.04, 0.35, 1.4]} />
-          <meshStandardMaterial color="#0d9488" metalness={0.4} roughness={0.2} />
-        </mesh>
-      </group>
-
-      {/* Step-Free Entrance Portal Frame */}
-      <group position={[0.5, 0.8, -1.2]}>
-        {/* Left Post */}
-        <mesh position={[-0.55, 0, 0]} castShadow>
-          <boxGeometry args={[0.08, 0.9, 0.08]} />
-          <meshStandardMaterial color="#0f172a" roughness={0.3} />
-        </mesh>
-        {/* Right Post */}
-        <mesh position={[0.55, 0, 0]} castShadow>
-          <boxGeometry args={[0.08, 0.9, 0.08]} />
-          <meshStandardMaterial color="#0f172a" roughness={0.3} />
-        </mesh>
-        {/* Top Header */}
-        <mesh position={[0, 0.45, 0]} castShadow>
-          <boxGeometry args={[1.18, 0.08, 0.08]} />
-          <meshStandardMaterial color="#0f172a" roughness={0.3} />
-        </mesh>
-        {/* Glazed Automatic Door Glass */}
-        <mesh position={[0, 0, 0]}>
-          <boxGeometry args={[1.02, 0.82, 0.02]} />
-          <meshStandardMaterial color="#99f6e4" transparent opacity={0.35} roughness={0.1} />
-        </mesh>
-      </group>
     </group>
   );
 };
@@ -135,7 +75,7 @@ const AccessibleModel: React.FC = () => {
 /* -------------------------------------------------------------------------- */
 /* Resilient 2D Architectural Diagram Fallback                                */
 /* -------------------------------------------------------------------------- */
-const ArchitecturalFallback2D: React.FC<{ reason?: string }> = ({ reason }) => {
+const ArchitecturalFallback2D: React.FC<{ reason?: string; categoryTitle?: string }> = ({ reason, categoryTitle }) => {
   return (
     <div 
       className="w-full h-full min-h-[380px] flex flex-col items-center justify-center bg-gradient-to-br from-slate-100 via-teal-50/40 to-slate-100 rounded-3xl p-6 border border-slate-200/80 shadow-inner"
@@ -149,8 +89,8 @@ const ArchitecturalFallback2D: React.FC<{ reason?: string }> = ({ reason }) => {
       >
         <defs>
           <linearGradient id="rampGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#14b8a6" stopOpacity="0.8" />
-            <stop offset="100%" stopColor="#0f766e" stopOpacity="0.9" />
+            <stop offset="0%" stopColor="#0F9D91" stopOpacity="0.8" />
+            <stop offset="100%" stopColor="#17365B" stopOpacity="0.9" />
           </linearGradient>
           <linearGradient id="platformGrad" x1="0%" y1="0%" x2="0%" y2="100%">
             <stop offset="0%" stopColor="#ffffff" />
@@ -158,43 +98,40 @@ const ArchitecturalFallback2D: React.FC<{ reason?: string }> = ({ reason }) => {
           </linearGradient>
         </defs>
 
-        {/* Foundation Grid Lines */}
-        <line x1="60" y1="240" x2="340" y2="240" stroke="#cbd5e1" strokeWidth="2" strokeDasharray="4 4" />
-        <line x1="60" y1="210" x2="340" y2="210" stroke="#e2e8f0" strokeWidth="1" />
-
-        {/* Ground Base */}
-        <rect x="70" y="230" width="260" height="20" rx="4" fill="#e2e8f0" />
+        {/* Base Grid Blueprint */}
+        <rect x="40" y="240" width="320" height="40" rx="4" fill="#e2e8f0" stroke="#cbd5e1" strokeWidth="1" />
+        <line x1="40" y1="260" x2="360" y2="260" stroke="#cbd5e1" strokeWidth="1" strokeDasharray="4 4" />
 
         {/* Sloped Ramp */}
-        <polygon points="90,230 200,170 200,185 90,245" fill="url(#rampGrad)" />
-        <line x1="90" y1="215" x2="200" y2="155" stroke="#0d9488" strokeWidth="3" />
+        <polygon points="90,240 200,180 200,240" fill="url(#rampGrad)" />
+        <line x1="90" y1="235" x2="200" y2="175" stroke="#0F9D91" strokeWidth="3" />
 
         {/* Raised Entrance Platform */}
-        <rect x="200" y="160" width="130" height="70" rx="4" fill="url(#platformGrad)" stroke="#cbd5e1" strokeWidth="2" />
+        <rect x="200" y="180" width="130" height="60" rx="4" fill="url(#platformGrad)" stroke="#cbd5e1" strokeWidth="2" />
 
         {/* Step-Free Entrance Portal */}
-        <rect x="235" y="90" width="60" height="70" rx="4" fill="#ccfbf1" fillOpacity="0.5" stroke="#0f172a" strokeWidth="3" />
-        <line x1="265" y1="90" x2="265" y2="160" stroke="#0f172a" strokeWidth="1.5" strokeDasharray="3 3" />
+        <rect x="235" y="110" width="60" height="70" rx="4" fill="#ccfbf1" fillOpacity="0.5" stroke="#101C36" strokeWidth="3" />
+        <line x1="265" y1="110" x2="265" y2="180" stroke="#101C36" strokeWidth="1.5" strokeDasharray="3 3" />
 
         {/* Floating Verified Pin Indicator */}
-        <g transform="translate(265, 45)">
-          <circle cx="0" cy="0" r="16" fill="#0d9488" />
+        <g transform="translate(265, 65)">
+          <circle cx="0" cy="0" r="16" fill="#0F9D91" />
           <circle cx="0" cy="0" r="7" fill="#ffffff" />
-          <polygon points="0,16 -6,7 6,7" fill="#0d9488" />
+          <polygon points="0,16 -6,7 6,7" fill="#0F9D91" />
         </g>
 
         {/* Labels & Callouts */}
-        <text x="135" y="260" textAnchor="middle" fill="#0f766e" fontSize="11" fontWeight="700">
-          Slope &lt; 1:12
+        <text x="135" y="275" textAnchor="middle" fill="#0F9D91" fontSize="11" fontWeight="700">
+          Slope &le; 1:12
         </text>
-        <text x="265" y="180" textAnchor="middle" fill="#0f172a" fontSize="11" fontWeight="700">
+        <text x="265" y="200" textAnchor="middle" fill="#101C36" fontSize="11" fontWeight="700">
           Step-Free Threshold
         </text>
       </svg>
 
       <div className="mt-4 flex items-center gap-2 px-3 py-1 rounded-full bg-white/90 border border-slate-200 text-xs font-semibold text-slate-700 shadow-2xs">
-        <ShieldCheck className="w-3.5 h-3.5 text-teal-600" />
-        <span>{reason || '2D Architectural Vector View (Active)'}</span>
+        <ShieldCheck className="w-3.5 h-3.5 text-[#0F9D91]" />
+        <span>{categoryTitle ? `${categoryTitle} (2D Vector View)` : reason || '2D Architectural Vector View (Active)'}</span>
       </div>
     </div>
   );
@@ -203,7 +140,12 @@ const ArchitecturalFallback2D: React.FC<{ reason?: string }> = ({ reason }) => {
 /* -------------------------------------------------------------------------- */
 /* Main ThreeDHero Component                                                  */
 /* -------------------------------------------------------------------------- */
-export const ThreeDHero: React.FC = () => {
+interface ThreeDHeroProps {
+  category?: string;
+  query?: string;
+}
+
+export const ThreeDHero: React.FC<ThreeDHeroProps> = ({ category, query }) => {
   const prefersReducedMotion = usePrefersReducedMotion();
   const [isWebGLSupported, setIsWebGLSupported] = useState<boolean>(true);
 
@@ -220,41 +162,58 @@ export const ThreeDHero: React.FC = () => {
     }
   }, []);
 
+  // Determine active category based on prop or query
+  const resolvedCategory: Venue3DCategory = resolveVenueCategory(category || query);
+
+  // Human-readable titles for category overlay badge
+  const categoryTitles: Record<Venue3DCategory, string> = {
+    HOSPITAL: 'Healthcare & Hospital Ingress',
+    SCHOOL: 'School & Education Facility',
+    COLLEGE: 'University & Academic Campus',
+    RESTAURANT: 'Dining & Patio Accessibility',
+    TRANSIT_STATION: 'Commuter & Transit Hub',
+    SHOPPING_MALL: 'Retail Mall & Commercial Atrium',
+    PUBLIC_OFFICE: 'Civic Centre & Public Office',
+    GENERIC: 'Accessible Physical Architecture',
+  };
+
+  const activeTitle = categoryTitles[resolvedCategory];
+
   // Progressive Fallback: Respect reduced motion and WebGL availability
   if (prefersReducedMotion) {
-    return <ArchitecturalFallback2D reason="Reduced Motion Mode Active" />;
+    return <ArchitecturalFallback2D reason="Reduced Motion Mode Active" categoryTitle={activeTitle} />;
   }
 
   if (!isWebGLSupported) {
-    return <ArchitecturalFallback2D reason="2D Accessible Vector Fallback" />;
+    return <ArchitecturalFallback2D reason="2D Accessible Vector Fallback" categoryTitle={activeTitle} />;
   }
 
   return (
     <div 
-      className="relative w-full h-[380px] sm:h-[440px] lg:h-[480px] rounded-3xl overflow-hidden bg-gradient-to-b from-slate-100/90 via-teal-50/30 to-slate-100/80 border border-slate-200/90 shadow-sm"
+      className="relative w-full h-[380px] sm:h-[440px] lg:h-[480px] rounded-3xl overflow-hidden bg-gradient-to-b from-slate-100/90 via-teal-50/20 to-slate-100/80 border border-slate-200/90 shadow-sm"
       role="figure"
-      aria-label="Interactive 3D model of an accessible building ingress featuring a sloped ramp, step-free portal, and floating verified location pin."
+      aria-label={`Interactive 3D model of ${activeTitle} featuring verified sloped ramps, step-free access, and location beacons.`}
     >
-      <ThreeErrorBoundary fallback={<ArchitecturalFallback2D reason="WebGL Context Fallback" />}>
+      <ThreeErrorBoundary fallback={<ArchitecturalFallback2D reason="WebGL Context Fallback" categoryTitle={activeTitle} />}>
         <Canvas
           shadows
           camera={{ position: [3.8, 3.2, 4.2], fov: 42 }}
           style={{ pointerEvents: 'auto' }}
         >
           {/* Lighting Rig */}
-          <ambientLight intensity={0.8} />
+          <ambientLight intensity={0.85} />
           <directionalLight 
             position={[5, 8, 4]} 
             intensity={1.3} 
             castShadow 
             shadow-mapSize={[1024, 1024]}
           />
-          <pointLight position={[-4, 2, -2]} color="#14b8a6" intensity={0.6} />
+          <pointLight position={[-4, 2, -2]} color="#2DD4BF" intensity={0.6} />
 
-          {/* Interactive Floating 3D Model */}
+          {/* Dynamic Category 3D Scene */}
           <Suspense fallback={null}>
-            <Float speed={1.6} rotationIntensity={0.2} floatIntensity={0.35}>
-              <AccessibleModel />
+            <Float speed={1.5} rotationIntensity={0.18} floatIntensity={0.3}>
+              <Category3DScene category={resolvedCategory} />
               <LocationPin />
             </Float>
           </Suspense>
@@ -271,13 +230,13 @@ export const ThreeDHero: React.FC = () => {
         </Canvas>
       </ThreeErrorBoundary>
 
-      {/* Visual Overlay Pill */}
-      <div className="absolute bottom-4 left-4 right-4 sm:right-auto flex items-center justify-between sm:justify-start gap-2 px-3.5 py-1.5 rounded-full bg-white/90 backdrop-blur-md border border-slate-200 text-xs font-semibold text-slate-700 shadow-sm pointer-events-none">
-        <div className="flex items-center gap-1.5">
-          <Compass className="w-3.5 h-3.5 text-teal-600" />
-          <span>Interactive 3D Spatial Model</span>
+      {/* Visual Overlay Pill showing the active dynamic category */}
+      <div className="absolute bottom-4 left-4 right-4 sm:right-auto flex items-center justify-between sm:justify-start gap-2 px-3.5 py-1.5 rounded-full bg-white/90 backdrop-blur-md border border-slate-200/80 text-xs font-semibold text-slate-700 shadow-sm pointer-events-none transition-all">
+        <div className="flex items-center gap-1.5 text-[#101C36]">
+          <Sparkles className="w-3.5 h-3.5 text-[#0F9D91]" />
+          <span>{activeTitle}</span>
         </div>
-        <span className="text-[10px] text-slate-600 uppercase tracking-wider font-mono">Drag to rotate</span>
+        <span className="text-[10px] text-slate-500 uppercase tracking-wider font-mono">Drag to rotate</span>
       </div>
     </div>
   );

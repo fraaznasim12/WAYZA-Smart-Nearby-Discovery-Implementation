@@ -45,7 +45,10 @@ AccessMap replaces uncertainty with verifiable truth through:
 - **Real-Time Phone Geolocation:** Native browser Geolocation API integration with permission recovery, accuracy circles, and fallback search.
 - **Custom Mobility Profiles:** Users configure personalized accessibility requirements (e.g. wheelchair, visual, stroller) that automatically filter venues.
 - **3D Spatial Cutaways:** Three.js / React Three Fiber interactive models visualizing multi-floor ingress, ramp gradients, and elevator positions.
-- **Community Field Audits:** Registered users can submit accessibility updates with multi-photo evidence and location notes.
+- **Community Field Audits & Reviews:** Registered users can submit detailed "Share Your Experience" reviews and accessibility updates with multi-photo evidence, rating stars, visit dates, and specific facility notes without overwriting certified audits.
+- **Authoritative Indian Administrative Search:** In-memory directory of all 36 Indian States and Union Territories with instant disambiguated city and district autocomplete.
+- **Retrieval-Grounded AI Assistant:** Conversational agent providing factual accessibility answers grounded directly in database records, featuring provenance evidence citations, staleness warnings, multilingual answers (Hindi, English, Spanish), and strict anti-hallucination guards.
+- **Category-Specific 3D Architectural Scenes:** Dynamic Three.js / React Three Fiber interactive models adapting to searched categories (Hospitals, Universities, Transit Stations, Restaurants, Shopping Malls, Public Offices).
 - **Secure Image Sanitization:** Automatic stripping of EXIF GPS metadata and image transcoding to safeguard user privacy.
 - **Real-Time Server-Sent Events (SSE):** Instant notifications when reports are peer-verified or community disputes are resolved.
 - **Facility Claim & Business Dashboard:** Business owners can claim venue listings, post official updates, and respond to community feedback.
@@ -204,12 +207,12 @@ A complete template is available in [`.env.production.example`](.env.production.
 ## 12. Testing & Verification
 
 ### Backend Automated Test Suite
-The backend includes 111 unit and integration tests covering authentication, PostGIS spatial queries, report submission, dispute handling, image upload flows, and admin dashboards:
+The backend includes 119 unit and integration tests covering authentication, PostGIS spatial queries, report submission, dispute handling, image upload flows, AI accuracy evaluation, location autocomplete, and community reviews:
 ```bash
 cd backend
-.\mvnw.cmd clean verify
+.\mvnw.cmd test
 ```
-*Result: 111 tests passed, 0 failures, 0 errors.*
+*Result: 119 tests passed, 0 failures, 0 errors.*
 
 ### Frontend Production Build & Type Check
 ```bash

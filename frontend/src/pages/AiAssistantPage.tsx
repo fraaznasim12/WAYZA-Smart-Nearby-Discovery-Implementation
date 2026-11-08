@@ -14,7 +14,7 @@ import {
   Compass,
 } from 'lucide-react';
 import { aiService } from '../services/aiService';
-import { AiChatMessage, AiSearchFilters } from '../types/ai';
+import { AiChatMessage, AiSearchFilters, AiEvidenceSource } from '../types/ai';
 import { Place } from '../types/place';
 
 interface MessageUI {
@@ -23,6 +23,8 @@ interface MessageUI {
   content: string;
   matchedPlaces?: Place[];
   filters?: AiSearchFilters | null;
+  sources?: AiEvidenceSource[];
+  reliabilityRating?: string;
   suggestedQuestions?: string[];
   timestamp: string;
 }
@@ -106,6 +108,8 @@ export const AiAssistantPage: React.FC = () => {
         content: response.reply,
         matchedPlaces: response.matchedPlaces,
         filters: response.structuredFilters,
+        sources: response.sources,
+        reliabilityRating: response.reliabilityRating,
         suggestedQuestions: response.suggestedQuestions,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       };
@@ -237,6 +241,52 @@ export const AiAssistantPage: React.FC = () => {
                         {f.replace(/_/g, ' ')}
                       </span>
                     ))}
+                  </div>
+                )}
+
+                {/* Verifiable Provenance Evidence Sources */}
+                {msg.sources && msg.sources.length > 0 && (
+                  <div className="mt-4 pt-3 border-t border-slate-100">
+                    <div className="flex items-center justify-between gap-2 mb-2">
+                      <p className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+                        <ShieldCheck className="w-3.5 h-3.5 text-[#0F9D91]" />
+                        <span>Verifiable Sources ({msg.sources.length})</span>
+                      </p>
+                      {msg.reliabilityRating && (
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider ${
+                          msg.reliabilityRating === 'HIGH_EVIDENCE'
+                            ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                            : msg.reliabilityRating === 'COMMUNITY_REPORTED'
+                            ? 'bg-amber-50 text-amber-700 border border-amber-200'
+                            : 'bg-slate-100 text-slate-600 border border-slate-200'
+                        }`}>
+                          {msg.reliabilityRating.replace(/_/g, ' ')}
+                        </span>
+                      )}
+                    </div>
+                    <div className="space-y-2">
+                      {msg.sources.map((src, i) => (
+                        <div key={i} className="p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 text-xs text-slate-700 flex flex-col gap-1">
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="font-bold text-[#101C36] truncate">{src.venueName}</span>
+                            <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${
+                              src.status === 'AVAILABLE' ? 'bg-emerald-100 text-emerald-800' :
+                              src.status === 'NOT_AVAILABLE' ? 'bg-rose-100 text-rose-800' :
+                              'bg-slate-200 text-slate-700'
+                            }`}>
+                              {src.status}
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-slate-600">{src.evidenceSummary}</p>
+                          <div className="flex items-center gap-2 text-[10px] text-slate-500 pt-0.5">
+                            <span className="capitalize">{src.sourceCategory.replace(/_/g, ' ').toLowerCase()}</span>
+                            {src.verificationDate && (
+                              <span>• Verified: {new Date(src.verificationDate).toLocaleDateString()}</span>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 )}
 

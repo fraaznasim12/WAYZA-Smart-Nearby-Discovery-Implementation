@@ -4,7 +4,7 @@ import { Compass, ShieldCheck, MapPin } from 'lucide-react';
 
 export const Footer: React.FC = () => {
   return (
-    <footer className="bg-[#102A43] text-slate-300 border-t border-[#1E3A5F]" aria-label="Footer">
+    <footer className="bg-[#101C36] text-slate-300 border-t border-[#17365B]" aria-label="Footer">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 mb-12">
@@ -12,7 +12,7 @@ export const Footer: React.FC = () => {
           {/* Brand Info */}
           <div className="lg:col-span-2">
             <Link to="/" className="inline-flex items-center gap-3 mb-4 focus:outline-hidden group">
-              <div className="w-10 h-10 rounded-xl bg-[#0F766E] flex items-center justify-center text-white font-bold shadow-md group-hover:bg-[#14B8A6] transition-colors">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#0F9D91] to-[#2DD4BF] flex items-center justify-center text-white font-bold shadow-md transition-transform group-hover:scale-105">
                 <Compass className="w-5 h-5 text-white" aria-hidden="true" />
               </div>
               <span className="text-xl font-extrabold text-white tracking-tight">AccessMap</span>
@@ -20,7 +20,7 @@ export const Footer: React.FC = () => {
             <p className="text-xs text-slate-300 leading-relaxed max-w-sm mb-4">
               An enterprise-grade physical accessibility discovery and verification platform. Helping wheelchair users, semi-ambulatory citizens, and families find reliable, dignified, and independently audited access.
             </p>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#0B1D30] border border-[#1E3A5F] text-xs text-emerald-300 font-medium">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#17365B] border border-white/10 text-xs text-[#2DD4BF] font-medium">
               <ShieldCheck className="w-3.5 h-3.5" aria-hidden="true" />
               <span>WCAG 2.2 AA Standard • PostGIS Spatial Core</span>
             </div>

@@ -4,17 +4,27 @@
   --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-display: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
 
-  --color-primary: #102A43;
-  --color-primary-hover: #1E3A5F;
-  --color-secondary: #0F766E;
-  --color-secondary-hover: #115E59;
-  --color-accent: #10B981;
-  --color-mint: #E8F5F1;
+  /* Coordinated Palette — Phase 19 Design System */
+  --color-midnight-navy: #101C36;
+  --color-deep-blue: #17365B;
+  --color-ocean-teal: #0F9D91;
+  --color-bright-aqua: #2DD4BF;
+  --color-aurora-violet: #6D5EF6;
+  --color-coral: #FF826E;
+  --color-warm-amber: #F5B942;
+  --color-bg-base: #F5F8FC;
   --color-surface: #FFFFFF;
-  --color-app-bg: #F7F9FC;
-  --color-text-main: #172B3A;
-  --color-text-muted: #486581;
-  --color-border-main: #D9E2EC;
+
+  /* Legacy semantic mappings for backward compatibility */
+  --color-primary: #101C36;
+  --color-primary-hover: #17365B;
+  --color-secondary: #0F9D91;
+  --color-secondary-hover: #0c7e75;
+  --color-accent: #2DD4BF;
+  --color-mint: #E8F5F1;
+  --color-text-main: #101C36;
+  --color-text-muted: #5B6B82;
+  --color-border-main: #E2E8F0;
 }
 
 @layer base {
@@ -32,8 +42,8 @@
     -webkit-text-size-adjust: 100%;
     tab-size: 4;
     font-family: var(--font-sans);
-    background-color: #F7F9FC;
-    color: #172B3A;
+    background-color: #F5F8FC;
+    color: #101C36;
   }
 
   body {
@@ -41,21 +51,47 @@
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    background-color: #F7F9FC;
-    color: #172B3A;
+    background-color: #F5F8FC;
+    color: #101C36;
   }
 
   /* Accessible Focus Rings (WCAG 2.2 AA - 2.4.7 Focus Visible & 2.4.11 Focus Appearance) */
   :focus-visible {
-    outline: 2px solid #0F766E;
+    outline: 2px solid #0F9D91;
     outline-offset: 2px;
   }
 
   /* Accessible Text Selection Highlight */
   ::selection {
-    background-color: #0F766E;
+    background-color: #0F9D91;
     color: #ffffff;
   }
+}
+
+/* Tasteful Coordinated Gradient Utilities */
+.bg-gradient-hero {
+  background: radial-gradient(ellipse 80% 50% at 50% -20%, rgba(109, 94, 246, 0.25), transparent),
+              linear-gradient(180deg, #101C36 0%, #17365B 100%);
+}
+
+.bg-gradient-deep-violet {
+  background: linear-gradient(135deg, #17365B 0%, #6D5EF6 100%);
+}
+
+.bg-gradient-teal-aqua {
+  background: linear-gradient(135deg, #0F9D91 0%, #2DD4BF 100%);
+}
+
+.bg-gradient-violet-coral {
+  background: linear-gradient(135deg, #6D5EF6 0%, #FF826E 100%);
+}
+
+.bg-gradient-subtle-card {
+  background: linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 100%);
+}
+
+.border-gradient-teal {
+  border-image: linear-gradient(to right, #0F9D91, #2DD4BF) 1;
 }
 
 /* Reduced Motion Support (WCAG 2.2 AA - 2.3.3 Animation from Interactions) */

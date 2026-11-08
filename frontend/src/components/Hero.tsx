@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Search, MapPin, Sparkles } from 'lucide-react';
 import { ThreeDHero } from './ThreeDHero';
+import { resolveVenueCategory } from './3d/Category3DScene';
 
 interface HeroProps {
   onSearch?: (query: string) => void;
@@ -8,23 +10,34 @@ interface HeroProps {
 
 export const Hero: React.FC<HeroProps> = ({ onSearch }) => {
   const [query, setQuery] = useState('');
+  const [activeCategory, setActiveCategory] = useState<string>('HOSPITAL');
+  const navigate = useNavigate();
+
+  const handleQueryChange = (val: string) => {
+    setQuery(val);
+    const resolved = resolveVenueCategory(val);
+    if (resolved !== 'GENERIC') {
+      setActiveCategory(resolved);
+    }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (onSearch) {
       onSearch(query);
     }
-    const target = document.getElementById('features');
-    if (target) {
-      target.scrollIntoView({ behavior: 'smooth' });
-    }
+    // Navigate directly to Explore page with query
+    navigate(`/explore?q=${encodeURIComponent(query.trim())}`);
   };
 
-  const handleQuickFilter = (category: string) => {
-    setQuery(category);
+  const handleQuickFilter = (categoryLabel: string, categoryCode: string) => {
+    setQuery(categoryLabel);
+    setActiveCategory(categoryCode);
     if (onSearch) {
-      onSearch(category);
+      onSearch(categoryLabel);
     }
+    // Navigate directly to Explore with category filter
+    navigate(`/explore?category=${encodeURIComponent(categoryCode)}`);
   };
 
   return (
@@ -41,24 +54,24 @@ export const Hero: React.FC<HeroProps> = ({ onSearch }) => {
             
             {/* Pill Tag */}
             <div className="inline-flex items-center gap-2 self-start px-3.5 py-1.5 rounded-full bg-teal-50 border border-teal-200 text-teal-800 text-xs font-semibold mb-6 shadow-2xs">
-              <Sparkles className="w-4 h-4 text-teal-600 shrink-0" aria-hidden="true" />
+              <Sparkles className="w-4 h-4 text-[#0F9D91] shrink-0" aria-hidden="true" />
               <span>Verified Physical Accessibility Intelligence</span>
             </div>
 
             {/* Main Heading */}
             <h1 
               id="hero-heading" 
-              className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-slate-900 leading-[1.12]"
+              className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-[#101C36] leading-[1.14] font-display"
             >
               Explore Places. <br />
-              <span className="text-teal-700 underline decoration-teal-300 decoration-wavy decoration-2">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#0F9D91] to-[#2DD4BF]">
                 Without Barriers.
               </span>
             </h1>
 
             {/* Supporting Mission Statement */}
             <p className="mt-6 text-base sm:text-lg text-slate-600 leading-relaxed max-w-2xl">
-              AccessMap helps people with mobility considerations, wheelchair users, and families discover reliable, real-world accessibility conditions. Every ramp, elevator, and entrance is backed by our rigorous <strong>Four-State Verification Model</strong>.
+              AccessMap empowers individuals with mobility considerations, wheelchair users, elderly citizens, and families to navigate physical environments with certainty. Backed by our rigorous <strong>Four-State Verification Model</strong> and interactive 3D spatial cutaways.
             </p>
 
             {/* Accessible Search Form */}
@@ -68,41 +81,53 @@ export const Hero: React.FC<HeroProps> = ({ onSearch }) => {
               role="search"
               aria-label="Search accessible places"
             >
-              <div className="flex flex-col sm:flex-row gap-2.5 p-2 bg-white rounded-2xl border border-slate-300 shadow-md shadow-slate-200/50 focus-within:border-teal-600 focus-within:ring-2 focus-within:ring-teal-600/20 transition-all">
+              <div className="flex flex-col sm:flex-row gap-2.5 p-2 bg-white rounded-2xl border border-slate-300 shadow-md shadow-slate-200/50 focus-within:border-[#0F9D91] focus-within:ring-2 focus-within:ring-[#0F9D91]/20 transition-all">
                 <div className="relative grow flex items-center">
-                  <MapPin className="absolute left-3.5 w-5 h-5 text-teal-700 pointer-events-none" aria-hidden="true" />
+                  <MapPin className="absolute left-3.5 w-5 h-5 text-[#0F9D91] pointer-events-none" aria-hidden="true" />
                   <label htmlFor="place-search" className="sr-only">
-                    Search for hospitals, colleges, stations, or addresses
+                    Search for hospitals, colleges, schools, transit stations, or venues
                   </label>
                   <input
                     id="place-search"
                     type="text"
                     value={query}
-                    onChange={(e) => setQuery(e.target.value)}
-                    placeholder="Search hospitals, universities, transit hubs..."
+                    onChange={(e) => handleQueryChange(e.target.value)}
+                    placeholder="Search schools, hospitals, transit, cafes..."
                     className="w-full pl-11 pr-4 py-3 bg-transparent text-slate-900 placeholder-slate-400 text-sm focus:outline-hidden"
                   />
                 </div>
                 <button
                   type="submit"
-                  className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-sm font-semibold shadow-xs hover:shadow-md transition-all cursor-pointer shrink-0"
+                  className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-[#0F9D91] to-[#2DD4BF] text-white text-sm font-semibold shadow-xs hover:opacity-95 transition-all cursor-pointer shrink-0"
                 >
                   <Search className="w-4 h-4" aria-hidden="true" />
                   <span>Explore Places</span>
                 </button>
               </div>
 
-              {/* Quick Filter Tags */}
+              {/* Quick Filter Tags (Reacting directly to 3D and Search) */}
               <div className="mt-4 flex flex-wrap items-center gap-2">
                 <span className="text-xs font-semibold text-slate-600">Quick Filters:</span>
-                {['Hospitals', 'Transit Hubs', 'Universities', 'Restaurants'].map((cat) => (
+                {[
+                  { label: 'Hospitals', code: 'HOSPITAL' },
+                  { label: 'Schools', code: 'SCHOOL' },
+                  { label: 'Universities', code: 'COLLEGE' },
+                  { label: 'Transit Hubs', code: 'TRANSIT_STATION' },
+                  { label: 'Restaurants', code: 'RESTAURANT' },
+                  { label: 'Shopping Malls', code: 'SHOPPING_MALL' },
+                ].map((item) => (
                   <button
-                    key={cat}
+                    key={item.code}
                     type="button"
-                    onClick={() => handleQuickFilter(cat)}
-                    className="text-xs px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-teal-50 hover:text-teal-700 text-slate-600 transition-colors cursor-pointer border border-slate-200/80"
+                    onClick={() => handleQuickFilter(item.label, item.code)}
+                    onMouseEnter={() => setActiveCategory(item.code)}
+                    className={`text-xs px-2.5 py-1 rounded-lg transition-all cursor-pointer border ${
+                      activeCategory === item.code
+                        ? 'bg-teal-50 text-teal-800 border-teal-300 font-bold shadow-2xs'
+                        : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-200'
+                    }`}
                   >
-                    {cat}
+                    {item.label}
                   </button>
                 ))}
               </div>
@@ -111,25 +136,25 @@ export const Hero: React.FC<HeroProps> = ({ onSearch }) => {
             {/* Trust Markers Strip */}
             <div className="mt-10 pt-8 border-t border-slate-200 grid grid-cols-3 gap-4 max-w-lg">
               <div>
-                <p className="text-xl sm:text-2xl font-bold text-slate-900">4-State</p>
+                <p className="text-xl sm:text-2xl font-bold text-[#101C36]">4-State</p>
                 <p className="text-xs font-medium text-slate-500 mt-0.5">Verification Rule</p>
               </div>
               <div>
-                <p className="text-xl sm:text-2xl font-bold text-teal-700">WCAG AA</p>
+                <p className="text-xl sm:text-2xl font-bold text-[#0F9D91]">WCAG AA</p>
                 <p className="text-xs font-medium text-slate-500 mt-0.5">Standard Compliant</p>
               </div>
               <div>
-                <p className="text-xl sm:text-2xl font-bold text-slate-900">100%</p>
-                <p className="text-xs font-medium text-slate-500 mt-0.5">Crowdsourced &amp; Audited</p>
+                <p className="text-xl sm:text-2xl font-bold text-[#6D5EF6]">PostGIS</p>
+                <p className="text-xs font-medium text-slate-500 mt-0.5">Spatial Precision</p>
               </div>
             </div>
 
           </div>
 
-          {/* Right Column: 3D Accessibility Model / 2D Vector Fallback */}
+          {/* Right Column: 3D Category-Specific Model / 2D Vector Fallback */}
           <div className="lg:col-span-5 flex justify-center">
             <div className="w-full max-w-lg">
-              <ThreeDHero />
+              <ThreeDHero category={activeCategory} query={query} />
             </div>
           </div>
 

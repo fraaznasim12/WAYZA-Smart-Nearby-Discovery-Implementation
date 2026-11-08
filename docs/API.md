@@ -313,4 +313,33 @@ All admin routes strictly require `ROLE_ADMIN`.
 | :--- | :--- | :--- |
 | `GET` | `/actuator/health` | Spring Boot Actuator liveness and readiness probe |
 | `GET` | `/actuator/info` | Application metadata and build version |
+| `GET` | `/api/v1/health` | Public application health status and staleness SLA check |
+
+---
+
+## 10. Locations & Administrative Hierarchy
+
+Authoritative Indian administrative directory covering all 36 States and Union Territories.
+
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| `GET` | `/api/v1/locations/states` | List all 36 Indian States and Union Territories |
+| `GET` | `/api/v1/locations/districts` | List districts with optional `state` filter parameter |
+| `GET` | `/api/v1/locations/cities` | List major urban agglomerations and cities |
+| `GET` | `/api/v1/locations/suggest?q={query}` | Debounced autocomplete suggestions matching states, districts, and cities |
+
+---
+
+## 11. Community Place Reviews
+
+Community experiences with distinct moderation workflow. Does not alter verified accessibility audits.
+
+| Method | Endpoint | Auth | Description |
+| :--- | :--- | :--- | :--- |
+| `GET` | `/api/v1/places/{id}/reviews` | Public | Paginated list of approved community reviews for a place |
+| `POST`| `/api/v1/places/{id}/reviews` | `ROLE_USER`+ | Submit a review with rating (1-5), visit date, and accessibility checklist |
+| `GET` | `/api/v1/places/{id}/reviews/mine` | `ROLE_USER`+ | Retrieve authenticated user's review for a place |
+| `GET` | `/api/v1/admin/reviews/pending` | `ROLE_ADMIN` | Moderation queue for pending community reviews |
+| `PUT` | `/api/v1/admin/reviews/{id}/status` | `ROLE_ADMIN` | Approve (`APPROVED`) or reject (`REJECTED`) a review with justification |
+
 
