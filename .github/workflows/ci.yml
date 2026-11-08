@@ -33,7 +33,7 @@ jobs:
           cache: 'maven'
 
       - name: Build and Run Backend Tests
-        run: ./mvnw -B clean verify
+        run: bash ./mvnw -B clean verify
 
   # ===========================================================================
   # Frontend TypeScript Check & Vite Production Build
